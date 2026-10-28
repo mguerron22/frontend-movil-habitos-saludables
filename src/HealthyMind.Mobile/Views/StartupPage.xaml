@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Pantalla de arranque: solo decide a dónde ir (login, huella o la app). -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.StartupPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Background="{StaticResource PageGlow}">
+    <VerticalStackLayout VerticalOptions="Center" Spacing="24">
+        <Image Source="logo.png" WidthRequest="120" HeightRequest="120" />
+        <ActivityIndicator IsRunning="True" WidthRequest="32" HeightRequest="32" />
+    </VerticalStackLayout>
+</ContentPage>

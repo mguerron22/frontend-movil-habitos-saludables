@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Inicio. Parte 1: encabezado, saludo y fecha. Parte 2: tarjeta de energía con anillo y lista de hábitos de hoy. -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.HomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:HomeViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <controls:AppHeader Section="Inicio" Initials="{Binding Initials}" />
+        <controls:OfflineBanner Grid.Row="1" />
+
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Padding="20,8,20,32" Spacing="18">
+                <VerticalStackLayout Spacing="6">
+                    <HorizontalStackLayout Spacing="6">
+                        <Image Source="ic_calendar.png" WidthRequest="16" HeightRequest="16" />
+                        <Label Text="{Binding TodayText}" Style="{StaticResource Caption}" FontFamily="OpenSansSemibold" />
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding Greeting}" Style="{StaticResource Display}" FontSize="28" />
+                    <Label Text="Respira profundo y nutre tu bienestar paso a paso." Style="{StaticResource Body}" />
+                </VerticalStackLayout>
+
+                <!-- Energía del día: la parte 2 pone aquí el progreso real (x de y hábitos, anillo y barra). -->
+                <Border
+                    Background="{StaticResource EnergyGradient}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 28"
+                    Padding="22">
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource Primary}" Opacity="0.3" Radius="22" Offset="0,10" />
+                    </Border.Shadow>
+                    <VerticalStackLayout Spacing="10">
+                        <Border BackgroundColor="#33FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="10,4" HorizontalOptions="Start">
+                            <Label Text="✦  ENERGÍA DEL DÍA" TextColor="{StaticResource OnPrimary}" FontSize="12" FontFamily="OpenSansSemibold" />
+                        </Border>
+                        <Label Text="Tu progreso de hoy" TextColor="{StaticResource OnPrimary}" FontSize="26" FontAttributes="Bold" FontFamily="OpenSansSemibold" />
+                        <Label Text="Aquí verás cuántos hábitos llevas y cuánto te falta para un día completo."
+                               TextColor="#E6FFFFFF" FontSize="14" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource SoftCard}" IsVisible="{Binding IsOfflineSession}">
+                    <Label Text="Entraste sin conexión: verás lo guardado en este teléfono y se sincronizará al volver el internet."
+                           TextColor="{StaticResource PrimaryDark}" FontSize="14" />
+                </Border>
+
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Hábitos de hoy" Style="{StaticResource Title}" />
+                </HorizontalStackLayout>
+
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="8">
+                        <Image Source="ic_leaf.png" WidthRequest="32" HeightRequest="32" HorizontalOptions="Start" />
+                        <Label Text="Tu lista de hoy aparecerá aquí" Style="{StaticResource Subtitle}" />
+                        <Label Text="Crea hábitos y márcalos con un toque cada día." Style="{StaticResource Body}" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

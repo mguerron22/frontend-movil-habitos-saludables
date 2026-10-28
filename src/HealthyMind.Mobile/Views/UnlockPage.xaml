@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.UnlockPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:UnlockViewModel"
+    Background="{StaticResource PageGlow}">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="24,24,24,36">
+        <controls:OfflineBanner Margin="-20,0" />
+
+        <VerticalStackLayout Grid.Row="1" VerticalOptions="Center" Spacing="22">
+            <Image Source="logo.png" WidthRequest="64" HeightRequest="64" />
+
+            <Border Style="{StaticResource Avatar}" WidthRequest="88" HeightRequest="88" HorizontalOptions="Center">
+                <Label Text="{Binding Initials}" Style="{StaticResource AvatarText}" FontSize="30" />
+            </Border>
+
+            <VerticalStackLayout Spacing="6">
+                <Label HorizontalOptions="Center" Style="{StaticResource Title}" Text="{Binding Greeting}" />
+                <Label HorizontalOptions="Center" HorizontalTextAlignment="Center" Style="{StaticResource Body}"
+                       Text="Toca la huella para entrar a tu espacio." />
+            </VerticalStackLayout>
+
+            <!-- Botón grande de huella con halo menta -->
+            <Border
+                AutomationId="UnlockButton"
+                HorizontalOptions="Center"
+                WidthRequest="132"
+                HeightRequest="132"
+                StrokeThickness="0"
+                StrokeShape="Ellipse"
+                BackgroundColor="{StaticResource MintSoft}">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource Mint}" Opacity="0.6" Radius="36" Offset="0,0" />
+                </Border.Shadow>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding UnlockCommand}" />
+                </Border.GestureRecognizers>
+                <Grid>
+                    <Image Source="ic_fingerprint.png" WidthRequest="72" HeightRequest="72" IsVisible="{Binding IsNotBusy}" />
+                    <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" WidthRequest="40" HeightRequest="40" />
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" HorizontalTextAlignment="Center" />
+            </Border>
+        </VerticalStackLayout>
+
+        <Label Grid.Row="2" HorizontalOptions="Center" Style="{StaticResource Link}" Text="Entrar con mi contraseña">
+            <Label.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding UsePasswordCommand}" />
+            </Label.GestureRecognizers>
+        </Label>
+    </Grid>
+</ContentPage>

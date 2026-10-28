@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Encabezado de las pestañas: logo, "HealthyMindIA", nombre de la sección, campana y avatar (como en el mock). -->
+<ContentView
+    x:Class="HealthyMind.Mobile.Controls.AppHeader"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="Root">
+    <Grid
+        Padding="20,14,20,6"
+        ColumnDefinitions="Auto,*,Auto,Auto"
+        ColumnSpacing="12">
+        <Image
+            Source="logo.png"
+            WidthRequest="40"
+            HeightRequest="40"
+            VerticalOptions="Center" />
+
+        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+            <Label FontSize="20" FontFamily="OpenSansSemibold" FontAttributes="Bold" TextColor="{StaticResource Primary}">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="HealthyMind" />
+                        <Span Text="IA" TextColor="{StaticResource PrimaryLight}" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <Label
+                x:Name="SectionLabel"
+                Style="{StaticResource Caption}"
+                FontSize="12" />
+        </VerticalStackLayout>
+
+        <Image
+            Grid.Column="2"
+            Source="ic_bell.png"
+            WidthRequest="22"
+            HeightRequest="22"
+            VerticalOptions="Center" />
+
+        <Border Grid.Column="3" Style="{StaticResource Avatar}" WidthRequest="40" HeightRequest="40">
+            <Label x:Name="InitialsLabel" Style="{StaticResource AvatarText}" FontSize="14" />
+        </Border>
+    </Grid>
+</ContentView>

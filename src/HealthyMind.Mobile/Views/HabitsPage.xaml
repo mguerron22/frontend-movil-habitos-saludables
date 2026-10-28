@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Pestaña reservada: la construye la parte 2 del frontend. -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.HabitsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <controls:AppHeader x:Name="Header" Section="Hábitos" />
+        <controls:OfflineBanner Grid.Row="1" />
+
+        <VerticalStackLayout Grid.Row="2" Padding="20,16" Spacing="16">
+            <Label Text="Tus hábitos" Style="{StaticResource Display}" FontSize="28" />
+            <Border Style="{StaticResource Card}">
+                <VerticalStackLayout Spacing="10">
+                    <Image Source="ic_leaf.png" WidthRequest="32" HeightRequest="32" HorizontalOptions="Start" />
+                    <Label Text="Aquí podrás crear, editar y pausar tus hábitos, con su categoría, meta y días de la semana." Style="{StaticResource Body}" />
+                    <Border Style="{StaticResource Chip}">
+                        <Label Text="En construcción · Parte 2" Style="{StaticResource ChipText}" />
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

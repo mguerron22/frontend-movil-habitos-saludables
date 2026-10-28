@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<!-- Paleta tomada de los mocks de HealthyMindIA. Úsala por nombre (StaticResource) en vez de repetir códigos. -->
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Marca -->
+    <Color x:Key="Primary">#0E6B5E</Color>
+    <Color x:Key="PrimaryDark">#0A4F46</Color>
+    <Color x:Key="PrimaryLight">#2E8C7D</Color>
+    <Color x:Key="Mint">#5FE3CC</Color>
+    <Color x:Key="MintSoft">#DDF7F1</Color>
+    <Color x:Key="MintChip">#C9F3EA</Color>
+
+    <!-- Superficies -->
+    <Color x:Key="PageBackground">#FFF7F4</Color>
+    <Color x:Key="Surface">#FFFFFF</Color>
+    <Color x:Key="InputBackground">#FBEDE9</Color>
+    <Color x:Key="Divider">#EFE2DE</Color>
+
+    <!-- Texto -->
+    <Color x:Key="TextPrimary">#1B2422</Color>
+    <Color x:Key="TextSecondary">#56625F</Color>
+    <Color x:Key="TextMuted">#9AA4A1</Color>
+    <Color x:Key="OnPrimary">#FFFFFF</Color>
+
+    <!-- Estados y categorías -->
+    <Color x:Key="Warning">#B45309</Color>
+    <Color x:Key="WarningSoft">#FFEBD9</Color>
+    <Color x:Key="Danger">#B42318</Color>
+    <Color x:Key="DangerSoft">#FDE7E4</Color>
+    <Color x:Key="Fire">#F08A24</Color>
+    <Color x:Key="Peach">#FFE3D3</Color>
+
+    <!-- Tarjeta "Energía del día": degradado como en el mock. -->
+    <LinearGradientBrush x:Key="EnergyGradient" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#0E6B5E" Offset="0.0" />
+        <GradientStop Color="#139081" Offset="1.0" />
+    </LinearGradientBrush>
+
+    <!-- Brillo menta en la parte de arriba de las pantallas de acceso. -->
+    <LinearGradientBrush x:Key="PageGlow" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#E3F9F3" Offset="0.0" />
+        <GradientStop Color="#FFF7F4" Offset="0.4" />
+    </LinearGradientBrush>
+</ResourceDictionary>

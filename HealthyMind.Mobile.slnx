@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/HealthyMind.Mobile.Core/HealthyMind.Mobile.Core.csproj" />
+    <Project Path="src/HealthyMind.Mobile/HealthyMind.Mobile.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/HealthyMind.Mobile.Core.Tests/HealthyMind.Mobile.Core.Tests.csproj" />
+  </Folder>
+</Solution>

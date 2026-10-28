@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Perfil. Parte 1: datos, huella y cerrar sesión. Parte 3: editar perfil, contraseña, dispositivos y administración. -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.ProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:ProfileViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <controls:AppHeader Section="Perfil" Initials="{Binding Initials}" />
+        <controls:OfflineBanner Grid.Row="1" />
+
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Padding="20,12,20,32" Spacing="18">
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Border Style="{StaticResource Avatar}" WidthRequest="84" HeightRequest="84" HorizontalOptions="Center">
+                            <Label Text="{Binding Initials}" Style="{StaticResource AvatarText}" FontSize="28" />
+                        </Border>
+                        <Label Text="{Binding FullName}" Style="{StaticResource Title}" HorizontalOptions="Center" />
+                        <Label Text="{Binding Username}" Style="{StaticResource Caption}" HorizontalOptions="Center" />
+                        <Label Text="{Binding Email}" Style="{StaticResource Body}" HorizontalOptions="Center" />
+                        <Border Style="{StaticResource Chip}" HorizontalOptions="Center" IsVisible="{Binding IsAdmin}">
+                            <Label Text="Administrador" Style="{StaticResource ChipText}" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Seguridad" Style="{StaticResource Subtitle}" />
+                <Border Style="{StaticResource Card}" Padding="18,14">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                        <Image Source="ic_fingerprint.png" WidthRequest="30" HeightRequest="30" />
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label Text="Entrar con huella" FontFamily="OpenSansSemibold" />
+                            <Label Style="{StaticResource Caption}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsBiometricAvailable}" Value="True">
+                                        <Setter Property="Text" Value="No volverás a escribir tu contraseña en este teléfono." />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsBiometricAvailable}" Value="False">
+                                        <Setter Property="Text" Value="Registra una huella en los ajustes del teléfono para activarla." />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+                        <Switch
+                            Grid.Column="2"
+                            IsToggled="{Binding IsBiometricEnabled}"
+                            IsEnabled="{Binding IsBiometricAvailable}"
+                            VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
+                    <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
+                </Border>
+
+                <Button
+                    Style="{StaticResource DangerButton}"
+                    Text="Cerrar sesión"
+                    ImageSource="ic_logout.png"
+                    ContentLayout="Left,8"
+                    Command="{Binding LogoutCommand}"
+                    IsEnabled="{Binding IsNotBusy}" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

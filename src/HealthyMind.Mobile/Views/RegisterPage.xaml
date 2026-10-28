@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.RegisterPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:RegisterViewModel"
+    Background="{StaticResource PageGlow}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,16,24,32" Spacing="18">
+            <controls:OfflineBanner Margin="-20,0" />
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <ImageButton
+                    Source="ic_arrow_left.png"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    Padding="10"
+                    CornerRadius="22"
+                    BackgroundColor="{StaticResource Surface}"
+                    Command="{Binding GoBackCommand}"
+                    SemanticProperties.Description="Volver" />
+                <Image Grid.Column="1" Source="logo.png" WidthRequest="44" HeightRequest="44" HorizontalOptions="End" />
+            </Grid>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Style="{StaticResource Display}" Text="Crea tu cuenta" />
+                <Label Style="{StaticResource Body}" Text="Empieza hoy a construir hábitos que te hagan bien." />
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource Card}" Padding="20,22">
+                <VerticalStackLayout Spacing="14">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <controls:FormField
+                            Label="Nombre"
+                            Icon="ic_user.png"
+                            Placeholder="Ana"
+                            Text="{Binding FirstName}"
+                            Error="{Binding FirstNameError}" />
+                        <controls:FormField
+                            Grid.Column="1"
+                            Label="Apellido"
+                            Icon="ic_user.png"
+                            Placeholder="Pérez"
+                            Text="{Binding LastName}"
+                            Error="{Binding LastNameError}" />
+                    </Grid>
+
+                    <controls:FormField
+                        Label="Usuario"
+                        Icon="ic_at.png"
+                        Placeholder="ana.perez"
+                        Text="{Binding Username}"
+                        Error="{Binding UsernameError}" />
+
+                    <controls:FormField
+                        Label="Correo electrónico"
+                        Icon="ic_mail.png"
+                        Placeholder="tu@correo.com"
+                        Keyboard="Email"
+                        Text="{Binding Email}"
+                        Error="{Binding EmailError}" />
+
+                    <controls:FormField
+                        Label="Contraseña"
+                        Icon="ic_key.png"
+                        Placeholder="Mínimo 8, con mayúscula y número"
+                        IsPassword="{Binding IsPasswordHidden}"
+                        Text="{Binding Password}"
+                        Error="{Binding PasswordError}" />
+
+                    <controls:FormField
+                        Label="Confirmar contraseña"
+                        Icon="ic_key.png"
+                        Placeholder="Repite tu contraseña"
+                        IsPassword="{Binding IsPasswordHidden}"
+                        Text="{Binding ConfirmPassword}"
+                        Error="{Binding ConfirmPasswordError}" />
+
+                    <HorizontalStackLayout Spacing="6">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding TogglePasswordVisibilityCommand}" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Image WidthRequest="18" HeightRequest="18">
+                            <Image.Triggers>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsPasswordHidden}" Value="True">
+                                    <Setter Property="Source" Value="ic_eye.png" />
+                                </DataTrigger>
+                                <DataTrigger TargetType="Image" Binding="{Binding IsPasswordHidden}" Value="False">
+                                    <Setter Property="Source" Value="ic_eye_off.png" />
+                                </DataTrigger>
+                            </Image.Triggers>
+                        </Image>
+                        <Label Style="{StaticResource Caption}" Text="Mostrar contraseñas" />
+                    </HorizontalStackLayout>
+
+                    <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
+                        <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
+                    </Border>
+
+                    <Grid>
+                        <Button
+                            Style="{StaticResource PrimaryButton}"
+                            Text="Crear cuenta  →"
+                            Command="{Binding RegisterCommand}"
+                            IsEnabled="{Binding IsNotBusy}" />
+                        <ActivityIndicator
+                            IsRunning="{Binding IsBusy}"
+                            IsVisible="{Binding IsBusy}"
+                            Color="{StaticResource OnPrimary}"
+                            WidthRequest="24"
+                            HeightRequest="24"
+                            HorizontalOptions="End"
+                            Margin="0,0,20,0" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource SoftCard}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Image Source="ic_shield.png" WidthRequest="22" HeightRequest="22" VerticalOptions="Start" />
+                    <Label
+                        Grid.Column="1"
+                        Text="Tus datos son solo tuyos. Después podrás entrar con tu huella sin escribir la contraseña."
+                        TextColor="{StaticResource TextPrimary}"
+                        FontSize="14" />
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

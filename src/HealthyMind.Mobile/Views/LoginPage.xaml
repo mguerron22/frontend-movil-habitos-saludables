@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:LoginViewModel"
+    Background="{StaticResource PageGlow}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,28,24,32" Spacing="18">
+            <controls:OfflineBanner Margin="-20,0" />
+
+            <!-- Logo con brillo menta -->
+            <Border
+                HorizontalOptions="Center"
+                WidthRequest="112"
+                HeightRequest="112"
+                StrokeThickness="0"
+                StrokeShape="Ellipse"
+                BackgroundColor="{StaticResource Surface}">
+                <Border.Shadow>
+                    <Shadow Brush="{StaticResource Mint}" Opacity="0.55" Radius="40" Offset="0,0" />
+                </Border.Shadow>
+                <Image Source="logo.png" WidthRequest="88" HeightRequest="88" />
+            </Border>
+
+            <Border Style="{StaticResource Chip}" HorizontalOptions="Center">
+                <HorizontalStackLayout Spacing="6">
+                    <Image Source="ic_leaf.png" WidthRequest="16" HeightRequest="16" />
+                    <Label Style="{StaticResource ChipText}" Text="Espacio Consciente" />
+                </HorizontalStackLayout>
+            </Border>
+
+            <VerticalStackLayout Spacing="4">
+                <Label HorizontalOptions="Center" Style="{StaticResource Display}">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="HealthyMind" />
+                            <Span Text="IA" TextColor="{StaticResource Primary}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label HorizontalOptions="Center" Style="{StaticResource Body}" Text="Cultiva tu bienestar día a día" />
+            </VerticalStackLayout>
+
+            <!-- Aviso que llega de otra pantalla (sesión expirada, cuenta suspendida...) -->
+            <Border Style="{StaticResource SoftCard}" IsVisible="{Binding HasNotice}">
+                <Label Text="{Binding Notice}" TextColor="{StaticResource PrimaryDark}" FontSize="14" />
+            </Border>
+
+            <Border Style="{StaticResource Card}" Padding="20,22">
+                <VerticalStackLayout Spacing="10">
+                    <HorizontalStackLayout Spacing="6">
+                        <Image Source="ic_at_teal.png" WidthRequest="18" HeightRequest="18" />
+                        <Label Style="{StaticResource FieldLabel}" Text="Correo electrónico o usuario" />
+                    </HorizontalStackLayout>
+                    <Border Style="{StaticResource InputShell}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Image Source="ic_mail.png" WidthRequest="20" HeightRequest="20" />
+                            <Entry
+                                Grid.Column="1"
+                                AutomationId="LoginUser"
+                                Placeholder="tu@correo.com"
+                                Keyboard="Email"
+                                IsSpellCheckEnabled="False"
+                                IsTextPredictionEnabled="False"
+                                ReturnType="Next"
+                                Text="{Binding UsernameOrEmail}" />
+                        </Grid>
+                    </Border>
+
+                    <HorizontalStackLayout Margin="0,6,0,0" Spacing="6">
+                        <Image Source="ic_lock.png" WidthRequest="18" HeightRequest="18" />
+                        <Label Style="{StaticResource FieldLabel}" Text="Contraseña" />
+                    </HorizontalStackLayout>
+                    <Border Style="{StaticResource InputShell}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                            <Image Source="ic_key.png" WidthRequest="20" HeightRequest="20" />
+                            <Entry
+                                Grid.Column="1"
+                                AutomationId="LoginPassword"
+                                Placeholder="••••••••"
+                                IsPassword="{Binding IsPasswordHidden}"
+                                ReturnType="Go"
+                                ReturnCommand="{Binding LoginCommand}"
+                                Text="{Binding Password}" />
+                            <ImageButton
+                                Grid.Column="2"
+                                WidthRequest="36"
+                                HeightRequest="36"
+                                Padding="6"
+                                BackgroundColor="Transparent"
+                                Command="{Binding TogglePasswordVisibilityCommand}"
+                                SemanticProperties.Description="Mostrar u ocultar la contraseña">
+                                <ImageButton.Triggers>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsPasswordHidden}" Value="True">
+                                        <Setter Property="Source" Value="ic_eye.png" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsPasswordHidden}" Value="False">
+                                        <Setter Property="Source" Value="ic_eye_off.png" />
+                                    </DataTrigger>
+                                </ImageButton.Triggers>
+                            </ImageButton>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource ErrorBox}" Margin="0,4,0,0" IsVisible="{Binding HasError}">
+                        <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
+                    </Border>
+
+                    <Grid Margin="0,10,0,0">
+                        <Button
+                            AutomationId="LoginButton"
+                            Style="{StaticResource PrimaryButton}"
+                            Text="Iniciar Sesión  →"
+                            Command="{Binding LoginCommand}"
+                            IsEnabled="{Binding IsNotBusy}" />
+                        <ActivityIndicator
+                            IsRunning="{Binding IsBusy}"
+                            IsVisible="{Binding IsBusy}"
+                            Color="{StaticResource OnPrimary}"
+                            WidthRequest="24"
+                            HeightRequest="24"
+                            HorizontalOptions="End"
+                            Margin="0,0,20,0" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border
+                Style="{StaticResource Chip}"
+                HorizontalOptions="Center"
+                BackgroundColor="{StaticResource InputBackground}"
+                Padding="18,10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoToRegisterCommand}" />
+                </Border.GestureRecognizers>
+                <Label FontSize="14">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="¿No tienes cuenta?  " TextColor="{StaticResource TextSecondary}" />
+                            <Span Text="Regístrate aquí" TextColor="{StaticResource Primary}" FontFamily="OpenSansSemibold" FontAttributes="Bold" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </Border>
+
+            <Border Style="{StaticResource SoftCard}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Image Source="ic_spark.png" WidthRequest="22" HeightRequest="22" VerticalOptions="Start" />
+                    <Label
+                        Grid.Column="1"
+                        Text="Tu camino a una mente en calma comienza con una sola respiración consciente."
+                        TextColor="{StaticResource TextPrimary}"
+                        FontSize="14" />
+                </Grid>
+            </Border>
+
+            <!-- Para probar en un celular físico: cambiar la dirección del backend. -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="6" Margin="0,4,0,0">
+                <HorizontalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ConfigureServerCommand}" />
+                </HorizontalStackLayout.GestureRecognizers>
+                <Image Source="ic_server.png" WidthRequest="14" HeightRequest="14" />
+                <Label Text="{Binding ServerUrl, StringFormat='Servidor: {0}'}" TextColor="{StaticResource TextMuted}" FontSize="12" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
