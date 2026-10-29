@@ -19,6 +19,12 @@ public interface IAppSettings
 
     /// <summary>Hasta cuándo sirve el refresh token guardado, para no intentar reanudar una sesión vencida.</summary>
     DateTimeOffset? RefreshTokenExpiresAt { get; set; }
+
+    /// <summary>El usuario aceptó guardar dónde registra sus hábitos (RF03, opcional).</summary>
+    bool LocationEnabled { get; set; }
+
+    /// <summary>Última lectura del contador de pasos (ver <see cref="Habits.StepDay"/>).</summary>
+    string? StepCounterState { get; set; }
 }
 
 /// <summary>Almacenamiento cifrado del refresh token (en MAUI: SecureStorage, respaldado por Android Keystore).</summary>

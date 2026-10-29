@@ -1,26 +1,204 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Pestaña reservada: la construye la mitad 2 del frontend. -->
+<!-- Estadísticas (RF04, mock 3): consistencia global, ritmo semanal, distribución por dimensión y detalle por hábito. -->
 <ContentPage
     x:Class="HealthyMind.Mobile.Views.StatsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls">
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:StatsViewModel">
 
     <Grid RowDefinitions="Auto,Auto,*">
-        <controls:AppHeader x:Name="Header" Section="Estadísticas" />
+        <controls:AppHeader Section="Estadísticas" Initials="{Binding Initials}" />
         <controls:OfflineBanner Grid.Row="1" />
 
-        <VerticalStackLayout Grid.Row="2" Padding="20,16" Spacing="16">
-            <Label Text="Tu progreso" Style="{StaticResource Display}" FontSize="28" />
-            <Border Style="{StaticResource Card}">
-                <VerticalStackLayout Spacing="10">
-                    <Image Source="tab_stats.png" WidthRequest="32" HeightRequest="32" HorizontalOptions="Start" />
-                    <Label Text="Consistencia global, ritmo semanal y distribución por dimensión de tus hábitos." Style="{StaticResource Body}" />
-                    <Border Style="{StaticResource Chip}">
-                        <Label Text="En construcción · Mitad 2" Style="{StaticResource ChipText}" />
-                    </Border>
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Padding="20,8,20,32" Spacing="18">
+
+                <!-- Semana / Mes -->
+                <Border BackgroundColor="{StaticResource InputBackground}" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="4" HorizontalOptions="Start">
+                    <HorizontalStackLayout Spacing="4">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="18,7" BackgroundColor="Transparent">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowWeekCommand}" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsWeek}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Label Text="Semana" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource TextSecondary}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsWeek}" Value="True">
+                                        <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="18,7" BackgroundColor="Transparent">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ShowMonthCommand}" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsMonth}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Label Text="Mes" FontFamily="OpenSansSemibold" FontSize="14" TextColor="{StaticResource TextSecondary}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsMonth}" Value="True">
+                                        <Setter Property="TextColor" Value="{StaticResource OnPrimary}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- Consistencia global -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="CONSISTENCIA GLOBAL" FontFamily="OpenSansSemibold" FontSize="13" TextColor="{StaticResource TextSecondary}" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Style="{StaticResource Chip}" IsVisible="{Binding HasTrend}" Padding="10,4">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding IsTrendUp}" Value="False">
+                                        <Setter Property="BackgroundColor" Value="{StaticResource WarningSoft}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <HorizontalStackLayout Spacing="4">
+                                    <Image WidthRequest="14" HeightRequest="14">
+                                        <Image.Triggers>
+                                            <DataTrigger TargetType="Image" Binding="{Binding IsTrendUp}" Value="True">
+                                                <Setter Property="Source" Value="ic_trend_up.png" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Image" Binding="{Binding IsTrendUp}" Value="False">
+                                                <Setter Property="Source" Value="ic_trend_down.png" />
+                                            </DataTrigger>
+                                        </Image.Triggers>
+                                    </Image>
+                                    <Label Text="{Binding TrendText}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource PrimaryDark}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsTrendUp}" Value="False">
+                                                <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </Grid>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="{Binding ConsistencyPercent}" FontSize="46" FontAttributes="Bold" FontFamily="OpenSansSemibold" TextColor="{StaticResource Primary}" />
+                            <Label Text="cumplimiento" FontSize="16" VerticalOptions="End" Margin="0,0,0,10" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding ConsistencyDetail}" Style="{StaticResource Body}" />
+
+                        <!-- L M X J V S D -->
+                        <FlexLayout Direction="Row" JustifyContent="SpaceBetween" Margin="0,6,0,0" BindableLayout.ItemsSource="{Binding WeekDays}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:WeekDayStatus">
+                                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                        <Label Text="{Binding Letter}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource TextSecondary}" HorizontalOptions="Center" />
+                                        <Border WidthRequest="36" HeightRequest="36" StrokeShape="Ellipse" StrokeThickness="0" BackgroundColor="{StaticResource InputBackground}">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsDone}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsPartial}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource PrimaryLight}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsToday}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource MintChip}" />
+                                                    <Setter Property="StrokeThickness" Value="2" />
+                                                    <Setter Property="Stroke" Value="{StaticResource Primary}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Grid>
+                                                <Image Source="ic_check_small.png" WidthRequest="16" HeightRequest="16" IsVisible="{Binding IsDone}" />
+                                                <Image Source="ic_check_small.png" WidthRequest="16" HeightRequest="16" IsVisible="{Binding IsPartial}" Opacity="0.7" />
+                                                <Image Source="ic_bolt.png" WidthRequest="16" HeightRequest="16" IsVisible="{Binding IsToday}" />
+                                                <Image Source="ic_dots.png" WidthRequest="16" HeightRequest="16" IsVisible="{Binding IsFuture}" />
+                                            </Grid>
+                                        </Border>
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Ritmo semanal -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                            <Image Source="ic_trend_line.png" WidthRequest="22" HeightRequest="22" />
+                            <Label Grid.Column="1" Text="Ritmo semanal" Style="{StaticResource Title}" FontSize="20" VerticalOptions="Center" />
+                            <Border Grid.Column="2" Style="{StaticResource Chip}" BackgroundColor="{StaticResource InputBackground}" Padding="10,3" VerticalOptions="Center">
+                                <Label Text="Lun - Dom" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+                            </Border>
+                        </Grid>
+                        <controls:WeeklyBarsChart ItemsSource="{Binding WeekBars}" />
+
+                        <!-- Distribución por dimensión -->
+                        <Border BackgroundColor="{StaticResource InputBackground}" StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="16">
+                            <VerticalStackLayout Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Distribución por dimensión" FontFamily="OpenSansSemibold" FontSize="14" />
+                                    <Label Grid.Column="1" Text="{Binding CategoriesText}" Style="{StaticResource Caption}" FontSize="12" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                                    <controls:DonutChart ItemsSource="{Binding Categories}" CenterText="{Binding CategoriesCount}" Caption="{Binding CategoriesCaption}" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center" BindableLayout.ItemsSource="{Binding Categories}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="vm:CategorySlice">
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                                    <Ellipse WidthRequest="10" HeightRequest="10" VerticalOptions="Center"
+                                                             Fill="{Binding Color, Converter={StaticResource HexColor}}" />
+                                                    <Label Grid.Column="1" Text="{Binding Info.Name}" FontSize="14" />
+                                                    <Label Grid.Column="2" Text="{Binding Percent}" FontSize="13" FontFamily="OpenSansSemibold" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Detalle por hábito -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Detalle por hábito" Style="{StaticResource Title}" />
+                    <Label Grid.Column="1" Text="{Binding PeriodLabel}" Style="{StaticResource Link}" VerticalOptions="Center" />
+                </Grid>
+
+                <Border Style="{StaticResource Card}" IsVisible="{Binding HasData, Converter={StaticResource Not}}">
+                    <Label Text="Crea hábitos y regístralos: aquí verás cómo te va con cada uno." Style="{StaticResource Body}" />
+                </Border>
+
+                <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding HabitDetails}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:HabitStatsItem">
+                            <Border Style="{StaticResource Card}" Padding="14">
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                                    <Border Grid.RowSpan="2" WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 14"
+                                            BackgroundColor="{Binding Category.TileColor, Converter={StaticResource HexColor}}" VerticalOptions="Center">
+                                        <Image Source="{Binding Category.Icon}" WidthRequest="22" HeightRequest="22" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                        <Label Text="{Binding Name}" FontFamily="OpenSansSemibold" FontSize="15" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Detail}" Style="{StaticResource Caption}" FontSize="12" />
+                                    </VerticalStackLayout>
+                                    <Label Grid.Column="2" Text="{Binding Percent}" FontFamily="OpenSansSemibold" FontSize="16" TextColor="{StaticResource Primary}" VerticalOptions="Center" />
+                                    <controls:RoundedProgressBar Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Progress="{Binding Ratio}" HeightRequest="8"
+                                                                 TrackColor="{StaticResource InputBackground}" FillColor="{StaticResource Primary}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-            </Border>
-        </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>

@@ -18,15 +18,18 @@ public sealed class SyncServiceTests : LocalDataTest
     private readonly FakeConnectivity _connectivity = new();
     private readonly SyncService _sync;
     private readonly HabitService _habits;
+    private readonly RecommendationStore _recommendations;
     private SyncPushRequest? _lastPush;
     private string? _lastPullQuery;
 
     public SyncServiceTests()
     {
+        _recommendations = new RecommendationStore(Database);
         var client = new AuthenticatedApiClient(new HttpClient(_server), _connectivity, new FakeSettings());
         _sync = new SyncService(
             new SyncApi(client),
             Store,
+            _recommendations,
             Outbox,
             _connectivity,
             new OnlineSession(),
@@ -126,6 +129,21 @@ public sealed class SyncServiceTests : LocalDataTest
     }
 
     [Fact]
+    public async Task Pull_keeps_the_ai_recommendations_to_read_them_offline()
+    {
+        var older = Recommendation("Semana constante", ServerTime.AddDays(-7));
+        var latest = Recommendation("Cuida los lunes", ServerTime);
+        RespondToPull(new SyncPullResponse(ServerTime, false, [], [], [older, latest]));
+
+        await _sync.SyncAsync();
+        RespondToPull(new SyncPullResponse(ServerTime, false, [], [], [latest]));
+        await _sync.SyncAsync();
+
+        var saved = await _recommendations.GetAllAsync();
+        Assert.Equal(["Cuida los lunes", "Semana constante"], saved.Select(row => row.Title));
+    }
+
+    [Fact]
     public async Task Without_connection_nothing_is_sent_and_changes_wait()
     {
         await _habits.SaveAsync(Draft("Tomar agua"));
@@ -141,6 +159,10 @@ public sealed class SyncServiceTests : LocalDataTest
 
     private static HabitResponse Habit(Guid id, string name) =>
         new(id, name, HabitCategory.Salud, 1, "vez", [], TrackingMode.Manual, true, ServerTime, ServerTime);
+
+    private static RecommendationResponse Recommendation(string title, DateTimeOffset createdAt) =>
+        new(Guid.NewGuid(), title, "Resumen", "Tomar agua", "• Acción 1\n• Acción 2","openai/gpt-oss-120b",
+            new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 28), createdAt);
 
     private static SyncItemResult Applied(HabitChange change) => new(change.Id, SyncItemStatus.Applied, null, null);
 
@@ -171,6 +193,8 @@ public sealed class SyncServiceTests : LocalDataTest
         public event EventHandler? OnlineRestored { add { } remove { } }
 
         public Task<bool> HasStoredSessionAsync() => Task.FromResult(true);
+
+        public Task UpdateCurrentUserAsync(Models.UserProfile user) => Task.CompletedTask;
 
         public Task LoginAsync(string usernameOrEmail, string password, CancellationToken cancellationToken = default) => Task.CompletedTask;
 

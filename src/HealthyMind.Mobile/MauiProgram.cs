@@ -1,6 +1,7 @@
 using HealthyMind.Mobile.Core;
 using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Connectivity;
+using HealthyMind.Mobile.Core.Habits;
 using HealthyMind.Mobile.Core.Navigation;
 using HealthyMind.Mobile.Core.Settings;
 using HealthyMind.Mobile.Services;
@@ -58,10 +59,14 @@ public static class MauiProgram
         services.AddSingleton<INavigationService, ShellNavigationService>();
         services.AddSingleton<IDialogService, ShellDialogService>();
         services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
+        services.AddSingleton(Geolocation.Default);
+        services.AddSingleton<ILocationProvider, MauiLocationProvider>();
 #if ANDROID
         services.AddSingleton<IBiometricAuthenticator, Platforms.Android.AndroidBiometricAuthenticator>();
+        services.AddSingleton<IStepSensor, Platforms.Android.AndroidStepSensor>();
 #elif WINDOWS
         services.AddSingleton<IBiometricAuthenticator, Platforms.Windows.WindowsHelloAuthenticator>();
+        services.AddSingleton<IStepSensor, NoStepSensor>();
 #endif
     }
 
@@ -78,5 +83,9 @@ public static class MauiProgram
         services.AddTransient<StatsPage>();
         services.AddTransient<InsightsPage>();
         services.AddTransient<ProfilePage>();
+        services.AddTransient<EditProfilePage>();
+        services.AddTransient<ChangePasswordPage>();
+        services.AddTransient<SessionsPage>();
+        services.AddTransient<AdminUsersPage>();
     }
 }

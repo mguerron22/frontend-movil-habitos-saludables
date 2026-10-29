@@ -63,6 +63,10 @@ internal sealed class FakeSettings : IAppSettings
     public bool BiometricOffered { get; set; }
 
     public DateTimeOffset? RefreshTokenExpiresAt { get; set; }
+
+    public bool LocationEnabled { get; set; }
+
+    public string? StepCounterState { get; set; }
 }
 
 internal sealed class FakeTokenStore : ISecureTokenStore

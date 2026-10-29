@@ -1,26 +1,119 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Pestaña reservada: la construye la mitad 2 del frontend. -->
+<!-- IA (RF05, mock 4): "Tu Brújula Diaria", la última recomendación generada por el backend y el historial. -->
 <ContentPage
     x:Class="HealthyMind.Mobile.Views.InsightsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls">
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:InsightsViewModel">
 
     <Grid RowDefinitions="Auto,Auto,*">
-        <controls:AppHeader x:Name="Header" Section="IA Insights" />
+        <controls:AppHeader Section="IA" Initials="{Binding Initials}" />
         <controls:OfflineBanner Grid.Row="1" />
 
-        <VerticalStackLayout Grid.Row="2" Padding="20,16" Spacing="16">
-            <Label Text="Tu Brújula Diaria" Style="{StaticResource Display}" FontSize="28" />
-            <Border Style="{StaticResource Card}">
-                <VerticalStackLayout Spacing="10">
-                    <Image Source="ic_spark.png" WidthRequest="32" HeightRequest="32" HorizontalOptions="Start" />
-                    <Label Text="Recomendaciones personalizadas que la IA genera automáticamente a partir de tu historial." Style="{StaticResource Body}" />
-                    <Border Style="{StaticResource Chip}">
-                        <Label Text="En construcción · Mitad 2" Style="{StaticResource ChipText}" />
+        <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}" RefreshColor="{StaticResource Primary}">
+            <ScrollView>
+                <VerticalStackLayout Padding="20,8,20,32" Spacing="18">
+
+                    <Border Style="{StaticResource Chip}" HorizontalOptions="Start">
+                        <HorizontalStackLayout Spacing="6">
+                            <Image Source="ic_bolt.png" WidthRequest="14" HeightRequest="14" />
+                            <Label Text="Inteligencia Saludable" Style="{StaticResource ChipText}" />
+                        </HorizontalStackLayout>
                     </Border>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Tu Brújula Diaria" Style="{StaticResource Display}" />
+                        <Label Text="Recomendaciones hechas con tu propio historial." Style="{StaticResource Body}" />
+                    </VerticalStackLayout>
+
+                    <!-- Aún no hay recomendaciones -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding HasRecommendation, Converter={StaticResource Not}}">
+                        <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                            <Border WidthRequest="56" HeightRequest="56" StrokeShape="Ellipse" StrokeThickness="0" BackgroundColor="{StaticResource MintSoft}" HorizontalOptions="Center">
+                                <Image Source="ic_brain_help.png" WidthRequest="28" HeightRequest="28" />
+                            </Border>
+                            <Label Text="Todavía no hay recomendaciones" FontFamily="OpenSansSemibold" FontSize="16" HorizontalTextAlignment="Center" />
+                            <Label Text="Sigue registrando tus hábitos: la IA analiza tu historial y te deja aquí su recomendación. Desliza hacia abajo para buscar nuevas."
+                                   Style="{StaticResource Body}" HorizontalTextAlignment="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Recomendación más reciente -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding HasRecommendation}">
+                        <VerticalStackLayout Spacing="12">
+                            <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource InputBackground}" HorizontalOptions="Start" Padding="10,4">
+                                <HorizontalStackLayout Spacing="6">
+                                    <Image Source="ic_clock.png" WidthRequest="14" HeightRequest="14" />
+                                    <Label Text="{Binding GeneratedText}" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+                                </HorizontalStackLayout>
+                            </Border>
+                            <Label Text="{Binding Title}" Style="{StaticResource Title}" />
+                            <Label Text="{Binding Summary}" Style="{StaticResource Body}" />
+                            <Border Style="{StaticResource Chip}" HorizontalOptions="Start" IsVisible="{Binding HasFocusHabit}">
+                                <HorizontalStackLayout Spacing="6">
+                                    <Image Source="ic_target_teal.png" WidthRequest="14" HeightRequest="14" />
+                                    <Label Text="{Binding FocusHabit, StringFormat='Enfoque: {0}'}" Style="{StaticResource ChipText}" />
+                                </HorizontalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Mejor y peor día (calculado en el teléfono) -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding HasPatterns}">
+                        <Border Style="{StaticResource Card}" BackgroundColor="{StaticResource MintSoft}" Padding="14">
+                            <VerticalStackLayout Spacing="6">
+                                <Image Source="ic_mood_up.png" WidthRequest="20" HeightRequest="20" HorizontalOptions="Start" />
+                                <Label Text="{Binding BestDayValue}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                                <Label Text="{Binding BestDayLabel}" Style="{StaticResource Caption}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource Card}" BackgroundColor="{StaticResource WarningSoft}" Padding="14">
+                            <VerticalStackLayout Spacing="6">
+                                <Image Source="ic_drop_warn.png" WidthRequest="20" HeightRequest="20" HorizontalOptions="Start" />
+                                <Label Text="{Binding WorstDayValue}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Warning}" />
+                                <Label Text="{Binding WorstDayLabel}" Style="{StaticResource Caption}" FontSize="12" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+
+                    <!-- Acciones sugeridas -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding HasRecommendation}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Qué hacer ahora" Style="{StaticResource Title}" FontSize="18" />
+                            <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Actions}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                            <Border WidthRequest="22" HeightRequest="22" StrokeShape="Ellipse" StrokeThickness="0" BackgroundColor="{StaticResource Primary}" VerticalOptions="Start" Margin="0,1,0,0">
+                                                <Image Source="ic_check_small.png" WidthRequest="12" HeightRequest="12" />
+                                            </Border>
+                                            <Label Grid.Column="1" Text="{Binding .}" Style="{StaticResource Body}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                            <Label Text="{Binding ModelName, StringFormat='Generado con {0}'}" Style="{StaticResource Caption}" FontSize="11" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Historial -->
+                    <Label Text="Recomendaciones anteriores" Style="{StaticResource Title}" FontSize="18" IsVisible="{Binding HasHistory}" />
+                    <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding History}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PastRecommendation">
+                                <Border Style="{StaticResource Card}" Padding="14">
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Generated}" Style="{StaticResource Caption}" FontSize="12" />
+                                        <Label Text="{Binding Title}" FontFamily="OpenSansSemibold" FontSize="15" />
+                                        <Label Text="{Binding Summary}" Style="{StaticResource Body}" MaxLines="3" LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-            </Border>
-        </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
     </Grid>
 </ContentPage>

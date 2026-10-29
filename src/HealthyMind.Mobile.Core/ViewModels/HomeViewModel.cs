@@ -24,6 +24,8 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
     private readonly IDialogService _dialogs;
     private readonly IUiDispatcher _ui;
     private readonly TimeProvider _timeProvider;
+    private readonly StepTracker _steps;
+    private readonly RecordLocation _location;
 
     [ObservableProperty]
     private string _greeting = string.Empty;
@@ -76,7 +78,9 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         INavigationService navigation,
         IDialogService dialogs,
         IUiDispatcher ui,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        StepTracker steps,
+        RecordLocation location)
     {
         _session = session;
         _habits = habits;
@@ -85,6 +89,8 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         _dialogs = dialogs;
         _ui = ui;
         _timeProvider = timeProvider;
+        _steps = steps;
+        _location = location;
         _session.OnlineRestored += OnOnlineRestored;
         _sync.Completed += OnSyncCompleted;
     }
@@ -105,6 +111,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         Initials = user?.Initials ?? string.Empty;
         IsOfflineSession = _session.IsOfflineSession;
 
+        await UpdateStepsAsync();
         await ReloadHabitsAsync();
         _sync.RequestSync();
     }
@@ -127,7 +134,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
 
         await RunAsync(async () =>
         {
-            await _habits.RecordAsync(item.Id, Today(), item.IsCompleted ? 0 : item.Goal);
+            await _habits.RecordAsync(item.Id, Today(), item.IsCompleted ? 0 : item.Goal, await _location.CurrentIfEnabledAsync());
             await ReloadHabitsAsync();
         });
     }
@@ -156,7 +163,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
 
         await RunAsync(async () =>
         {
-            await _habits.RecordAsync(item.Id, Today(), value);
+            await _habits.RecordAsync(item.Id, Today(), value, await _location.CurrentIfEnabledAsync());
             await ReloadHabitsAsync();
         });
     }
@@ -173,6 +180,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
     {
         try
         {
+            await UpdateStepsAsync();
             await _sync.SyncAsync();
             await ReloadHabitsAsync();
         }
@@ -204,6 +212,19 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         HasNoHabits = summary.ActiveHabits == 0;
         PendingSync = await _sync.PendingCountAsync();
         OnPropertyChanged(nameof(PendingSyncText));
+    }
+
+    /// <summary>Los hábitos de pasos se llenan solos; si el sensor falla, se siguen pudiendo anotar a mano.</summary>
+    private async Task UpdateStepsAsync()
+    {
+        try
+        {
+            await _steps.UpdateAsync();
+        }
+        catch (UserMessageException)
+        {
+            // P. ej. el hábito se pausó desde otro teléfono justo ahora: se ignora hasta la próxima lectura.
+        }
     }
 
     private DateOnly Today() => DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);

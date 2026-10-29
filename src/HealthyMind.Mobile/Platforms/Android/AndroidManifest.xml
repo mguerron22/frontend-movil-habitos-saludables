@@ -11,4 +11,11 @@
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.USE_BIOMETRIC" />
+	<!-- RF06: contador de pasos (permiso en tiempo de ejecución desde Android 10). -->
+	<uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+	<!-- RF03 (opcional): ubicación del registro, solo si el usuario la activa en su perfil. -->
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+	<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
+	<uses-feature android:name="android.hardware.location" android:required="false" />
 </manifest>

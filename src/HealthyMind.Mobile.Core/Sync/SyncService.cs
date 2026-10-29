@@ -48,6 +48,7 @@ public sealed class SyncService : ISyncService, IDisposable
 
     private readonly SyncApi _api;
     private readonly IHabitStore _store;
+    private readonly IRecommendationStore _recommendations;
     private readonly ISyncOutbox _outbox;
     private readonly IConnectivityService _connectivity;
     private readonly ISessionManager _session;
@@ -59,6 +60,7 @@ public sealed class SyncService : ISyncService, IDisposable
     public SyncService(
         SyncApi api,
         IHabitStore store,
+        IRecommendationStore recommendations,
         ISyncOutbox outbox,
         IConnectivityService connectivity,
         ISessionManager session,
@@ -67,6 +69,7 @@ public sealed class SyncService : ISyncService, IDisposable
     {
         _api = api;
         _store = store;
+        _recommendations = recommendations;
         _outbox = outbox;
         _connectivity = connectivity;
         _session = session;
@@ -270,6 +273,9 @@ public sealed class SyncService : ISyncService, IDisposable
         {
             await RemoveMissingAsync(response, pending);
         }
+
+        // Las recomendaciones solo se generan en el servidor: aquí se guardan para leerlas sin conexión.
+        await _recommendations.SaveAsync((response.Recommendations ?? []).Select(RecommendationRow.From));
 
         await _outbox.SetPullCursorAsync(response.ServerTime);
     }

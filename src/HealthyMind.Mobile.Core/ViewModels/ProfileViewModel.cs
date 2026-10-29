@@ -1,22 +1,21 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HealthyMind.Mobile.Core.Auth;
+using HealthyMind.Mobile.Core.Habits;
 using HealthyMind.Mobile.Core.Navigation;
 using HealthyMind.Mobile.Core.Settings;
 using HealthyMind.Mobile.Core.Sync;
 
 namespace HealthyMind.Mobile.Core.ViewModels;
 
-/// <summary>
-/// Perfil. Hecho: datos básicos, huella y cerrar sesión.
-/// La mitad 2 agrega editar perfil, cambiar contraseña, dispositivos y la vista de administrador.
-/// </summary>
+/// <summary>Perfil (RF01): datos, huella, accesos a editar perfil, contraseña y dispositivos, administración y cerrar sesión.</summary>
 public sealed partial class ProfileViewModel(
     ISessionManager session,
     BiometricEnrollment biometricEnrollment,
     IBiometricAuthenticator biometric,
     IAppSettings settings,
     ISyncService sync,
+    RecordLocation location,
     INavigationService navigation,
     IDialogService dialogs) : ViewModelBase
 {
@@ -43,6 +42,9 @@ public sealed partial class ProfileViewModel(
     [ObservableProperty]
     private bool _isBiometricEnabled;
 
+    [ObservableProperty]
+    private bool _isLocationEnabled;
+
     public async Task LoadAsync()
     {
         _loading = true;
@@ -54,6 +56,7 @@ public sealed partial class ProfileViewModel(
         IsAdmin = user?.IsAdmin == true;
         IsBiometricAvailable = await biometric.IsAvailableAsync();
         IsBiometricEnabled = settings.BiometricEnabled;
+        IsLocationEnabled = location.IsEnabled;
         _loading = false;
     }
 
@@ -78,6 +81,37 @@ public sealed partial class ProfileViewModel(
             _loading = false;
         }
     }
+
+    /// <summary>Guardar la ubicación de cada registro (RF03): activarla pide el permiso de ubicación.</summary>
+    async partial void OnIsLocationEnabledChanged(bool value)
+    {
+        if (_loading || value == location.IsEnabled)
+        {
+            return;
+        }
+
+        if (await location.SetEnabledAsync(value) != value)
+        {
+            _loading = true;
+            IsLocationEnabled = false;
+            _loading = false;
+            await dialogs.AlertAsync(
+                "Sin permiso de ubicación",
+                "Para guardar dónde registras tus hábitos, permite la ubicación a HealthyMindIA en los ajustes del teléfono.");
+        }
+    }
+
+    [RelayCommand]
+    private Task EditProfileAsync() => navigation.GoToEditProfileAsync();
+
+    [RelayCommand]
+    private Task ChangePasswordAsync() => navigation.GoToChangePasswordAsync();
+
+    [RelayCommand]
+    private Task SessionsAsync() => navigation.GoToSessionsAsync();
+
+    [RelayCommand]
+    private Task AdminUsersAsync() => navigation.GoToAdminUsersAsync();
 
     [RelayCommand]
     private async Task LogoutAsync()

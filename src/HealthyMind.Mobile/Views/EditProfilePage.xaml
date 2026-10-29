@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Editar perfil (RF01): nombre, apellido y correo. El usuario no se cambia. -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.EditProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:EditProfileViewModel"
+    Shell.TabBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,32" Spacing="18">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <ImageButton Source="ic_arrow_left.png" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="22"
+                             BackgroundColor="{StaticResource Surface}" Command="{Binding CancelCommand}" SemanticProperties.Description="Volver" />
+                <Label Grid.Column="1" Text="Editar perfil" Style="{StaticResource Title}" VerticalOptions="Center" />
+            </Grid>
+
+            <controls:OfflineBanner Margin="-20,0" />
+
+            <Border Style="{StaticResource Card}" Padding="20,22">
+                <VerticalStackLayout Spacing="16">
+                    <controls:FormField Label="Nombre" Icon="ic_user.png" Placeholder="Ana" Text="{Binding FirstName}" Error="{Binding FirstNameError}" />
+                    <controls:FormField Label="Apellido" Icon="ic_user.png" Placeholder="Pérez" Text="{Binding LastName}" Error="{Binding LastNameError}" />
+                    <controls:FormField Label="Correo" Icon="ic_mail.png" Placeholder="tu@correo.com" Keyboard="Email" Text="{Binding Email}" Error="{Binding EmailError}" />
+
+                    <HorizontalStackLayout Spacing="6">
+                        <Image Source="ic_at.png" WidthRequest="16" HeightRequest="16" />
+                        <Label Text="{Binding Username, StringFormat='Tu usuario {0} no se puede cambiar.'}" Style="{StaticResource Caption}" />
+                    </HorizontalStackLayout>
+
+                    <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
+                        <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
+                    </Border>
+
+                    <Grid>
+                        <Button Style="{StaticResource PrimaryButton}" Text="Guardar cambios" Command="{Binding SaveCommand}" IsEnabled="{Binding IsNotBusy}" />
+                        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource OnPrimary}"
+                                           WidthRequest="24" HeightRequest="24" HorizontalOptions="End" Margin="0,0,20,0" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

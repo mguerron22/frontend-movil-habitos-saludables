@@ -1,20 +1,20 @@
-using HealthyMind.Mobile.Core.Auth;
+using HealthyMind.Mobile.Core.ViewModels;
 
 namespace HealthyMind.Mobile.Views;
 
 public partial class InsightsPage : ContentPage
 {
-    private readonly ISessionManager _session;
+    private readonly InsightsViewModel _viewModel;
 
-    public InsightsPage(ISessionManager session)
+    public InsightsPage(InsightsViewModel viewModel)
     {
         InitializeComponent();
-        _session = session;
+        BindingContext = _viewModel = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        Header.Initials = _session.CurrentUser?.Initials ?? string.Empty;
+        await _viewModel.LoadAsync();
     }
 }

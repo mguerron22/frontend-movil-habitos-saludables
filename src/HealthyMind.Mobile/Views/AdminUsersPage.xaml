@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Administración de usuarios (RF01, solo Admin): buscar, suspender y reactivar. -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.AdminUsersPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:AdminUsersViewModel"
+    Shell.TabBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,32" Spacing="16">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <ImageButton Source="ic_arrow_left.png" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="22"
+                             BackgroundColor="{StaticResource Surface}" Command="{Binding GoBackCommand}" SemanticProperties.Description="Volver" />
+                <Label Grid.Column="1" Text="Usuarios" Style="{StaticResource Title}" VerticalOptions="Center" />
+            </Grid>
+
+            <controls:OfflineBanner Margin="-20,0" />
+
+            <!-- Búsqueda -->
+            <Border Style="{StaticResource InputShell}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                    <Image Source="ic_user.png" WidthRequest="18" HeightRequest="18" />
+                    <Entry Grid.Column="1" Placeholder="Buscar por nombre, usuario o correo" Text="{Binding Search}"
+                           ReturnType="Search" ReturnCommand="{Binding SearchCommand}" />
+                </Grid>
+            </Border>
+
+            <!-- Filtro por estado -->
+            <HorizontalStackLayout Spacing="8">
+                <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource InputBackground}" Padding="14,6">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:StatusFilter.All}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsAll}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource MintChip}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Todos" Style="{StaticResource ChipText}" />
+                </Border>
+                <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource InputBackground}" Padding="14,6">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:StatusFilter.Active}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsActiveFilter}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource MintChip}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Activos" Style="{StaticResource ChipText}" />
+                </Border>
+                <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource InputBackground}" Padding="14,6">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding SetFilterCommand}" CommandParameter="{x:Static vm:StatusFilter.Suspended}" />
+                    </Border.GestureRecognizers>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsSuspendedFilter}" Value="True">
+                            <Setter Property="BackgroundColor" Value="{StaticResource MintChip}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Label Text="Suspendidos" Style="{StaticResource ChipText}" />
+                </Border>
+            </HorizontalStackLayout>
+
+            <Label Text="{Binding ResultText}" Style="{StaticResource Caption}" />
+
+            <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
+            </Border>
+
+            <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding Users}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:AdminUserItem">
+                        <Border Style="{StaticResource Card}" Padding="14">
+                            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="8">
+                                <Border Grid.RowSpan="2" Style="{StaticResource Avatar}" WidthRequest="44" HeightRequest="44" VerticalOptions="Center">
+                                    <Label Text="{Binding Initials}" Style="{StaticResource AvatarText}" FontSize="15" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                    <Label Text="{Binding FullName}" FontFamily="OpenSansSemibold" FontSize="15" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Detail}" Style="{StaticResource Caption}" FontSize="12" LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
+                                <Border Grid.Column="2" Style="{StaticResource Chip}" Padding="10,3" VerticalOptions="Start">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsActive}" Value="False">
+                                            <Setter Property="BackgroundColor" Value="{StaticResource DangerSoft}" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="{Binding StatusText}" FontSize="12" FontFamily="OpenSansSemibold" TextColor="{StaticResource PrimaryDark}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsActive}" Value="False">
+                                                <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </Border>
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="8">
+                                    <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource Peach}" Padding="8,2" IsVisible="{Binding IsAdmin}">
+                                        <Label Text="Admin" FontSize="11" TextColor="{StaticResource Warning}" FontFamily="OpenSansSemibold" />
+                                    </Border>
+                                    <Label Text="Tú" Style="{StaticResource Caption}" FontSize="12" IsVisible="{Binding IsSelf}" />
+                                </HorizontalStackLayout>
+                                <Label Grid.Row="1" Grid.Column="2" Text="{Binding ActionText}" Style="{StaticResource Link}" FontSize="14"
+                                       HorizontalOptions="End" IsVisible="{Binding CanToggle}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsActive}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding ToggleStatusCommand, Source={RelativeSource AncestorType={x:Type vm:AdminUsersViewModel}}, x:DataType=vm:AdminUsersViewModel}"
+                                            CommandParameter="{Binding .}" />
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource Primary}" />
+
+            <Button Style="{StaticResource SoftButton}" Text="Ver más" Command="{Binding LoadMoreCommand}"
+                    IsVisible="{Binding CanLoadMore}" IsEnabled="{Binding IsNotBusy}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

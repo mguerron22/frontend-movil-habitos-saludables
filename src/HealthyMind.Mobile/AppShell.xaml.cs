@@ -12,5 +12,9 @@ public partial class AppShell : Shell
         // Pantallas que se apilan encima de otra (con "atrás"). Las pantallas nuevas registran aquí la suya.
         Routing.RegisterRoute(Routes.Register, typeof(RegisterPage));
         Routing.RegisterRoute(Routes.HabitEditor, typeof(HabitEditorPage));
+        Routing.RegisterRoute(Routes.EditProfile, typeof(EditProfilePage));
+        Routing.RegisterRoute(Routes.ChangePassword, typeof(ChangePasswordPage));
+        Routing.RegisterRoute(Routes.Sessions, typeof(SessionsPage));
+        Routing.RegisterRoute(Routes.AdminUsers, typeof(AdminUsersPage));
     }
 }

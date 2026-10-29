@@ -72,6 +72,7 @@ public static class LocalSchema
         typeof(HabitRecordRow),
         typeof(PendingChangeRow),
         typeof(SyncStateRow),
+        typeof(RecommendationRow),
     ];
 }
 

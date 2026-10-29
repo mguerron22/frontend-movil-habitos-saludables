@@ -73,7 +73,7 @@ Así se prueba sin emulador y la arquitectura queda igual que en el backend.
 | Mitad | Integrante | Alcance |
 |---|---|---|
 | **1** ✅ | Martín | Base del proyecto, estilos del mock, cliente API, sesión y huella, aviso sin internet, Login, Registro, Desbloqueo, Perfil básico **+ Hábitos, Inicio completo y sincronización sin conexión** |
-| **2** | (compañero) | Estadísticas, IA, Perfil completo y administración, pasos y ubicación |
+| **2** ✅ | e1724741283-arch | Estadísticas, IA, Perfil completo y administración, pasos y ubicación |
 
 ### Lo que ya está (mitad 1): hábitos y sin conexión
 
@@ -86,22 +86,24 @@ Así se prueba sin emulador y la arquitectura queda igual que en el backend.
 - Controles para reutilizar: `ProgressRing` (anillo) y `RoundedProgressBar` (barra), dibujados con `GraphicsView`;
   `CategoryInfo` trae nombre, ícono y colores de cada categoría.
 
-### Mitad 2 — Estadísticas, IA, Perfil y sensores (RF01, RF04, RF05, RF06, RF03)
+### Lo que ya está (mitad 2): estadísticas, IA, perfil y sensores (RF01, RF03, RF04, RF05, RF06)
 
-- **Stats** (`Views/StatsPage`, hoy reservada): consistencia global, círculos L–D de la semana, barras "Ritmo semanal"
-  y dona "Distribución por dimensión" (mock 3). Con conexión: `/api/statistics/weekly|monthly|range`; sin conexión se
-  puede calcular con los datos de `IHabitStore`, como hace `HabitInsights`. Para dibujar, partir de `ProgressRing`.
-- **IA** (`Views/InsightsPage`, hoy reservada): "Tu Brújula Diaria" (mock 4) con `GET /api/recommendations/latest` e
-  historial (`/api/recommendations`). Las recomendaciones las genera el backend solo; para verlas sin conexión,
-  agregar una tabla en `LocalSchema` y guardarlas.
-- **Perfil completo** (`ProfilePage` + `ProfileViewModel`): editar datos (`PUT /api/profile`), cambiar contraseña
-  (`PUT /api/profile/password`), dispositivos con sesión (`/api/auth/sessions`) y, si `IsAdmin`, administración:
-  buscar, suspender y reactivar cuentas (`/api/admin/users`).
-- **Pasos** (RF06): los hábitos con `TrackingMode.StepCounter` ya existen y el inicio pide el valor a mano. Falta leer
-  el podómetro de Android (sensor `StepCounter`, permiso `ACTIVITY_RECOGNITION`) y guardar el conteo del día con
-  `IHabitService.RecordAsync`.
-- **Ubicación opcional** (RF03): los registros ya tienen `Latitude`/`Longitude` en SQLite y en la sincronización.
-  Falta pedirla con `Geolocation` de MAUI al registrar (con permiso y opción de no compartirla).
+- **Stats** (mock 3): `Habits/StatisticsCalculator` calcula sobre SQLite, con la misma regla de "día esperado" que el
+  backend, así que funciona sin conexión. Semana/Mes, consistencia con tendencia contra el periodo anterior, círculos
+  L–D, barras "Ritmo semanal" (`WeeklyBarsChart`), dona por dimensión (`DonutChart`) y detalle por hábito.
+- **IA** (mock 4, "Tu Brújula Diaria"): las recomendaciones llegan dentro de `/api/sync/pull` y se guardan en la tabla
+  `recommendations` (`Data/RecommendationStore`): se leen también sin conexión. El mejor y el peor día de la semana se
+  calculan en el teléfono con las últimas 4 semanas. Deslizar hacia abajo sincroniza.
+- **Perfil completo:** editar nombre, apellido y correo (`PUT /api/profile`; el perfil guardado se actualiza para el
+  modo sin conexión), cambiar contraseña (cierra las demás sesiones y conserva la de este teléfono), "Mis
+  dispositivos" (cerrar una sesión o todas las demás) y, solo para Admin, **Administrar usuarios**: buscar, filtrar
+  por estado, suspender y reactivar (el admin no puede suspenderse a sí mismo). Estas pantallas necesitan conexión.
+- **Pasos (RF06):** `Habits/StepTracker` toma el contador acumulado de Android (`TYPE_STEP_COUNTER`, permiso
+  `ACTIVITY_RECOGNITION`) y lo convierte en pasos del día (`StepDay`: cambio de día y reinicio del teléfono). Llena
+  solo los hábitos "Contar pasos automáticamente" al abrir o refrescar Inicio, y nunca baja un valor ya registrado.
+  Sin sensor (el emulador no lo trae, ni Windows) esos hábitos se siguen anotando a mano.
+- **Ubicación (RF03, opcional):** interruptor "Guardar ubicación" en Perfil (apagado por defecto; pide el permiso al
+  activarlo). Si está activo, cada registro manual guarda latitud y longitud; sin GPS se guarda igual, sin ubicación.
 
 ### Para cualquier parte
 

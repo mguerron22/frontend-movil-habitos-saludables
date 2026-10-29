@@ -13,6 +13,10 @@ public static class Routes
     public const string Register = "register";
     public const string Habits = "habits";
     public const string HabitEditor = "habit-editor";
+    public const string EditProfile = "edit-profile";
+    public const string ChangePassword = "change-password";
+    public const string Sessions = "sessions";
+    public const string AdminUsers = "admin-users";
 
     /// <summary>Parámetro con el id del hábito a editar.</summary>
     public const string HabitIdParameter = "id";
@@ -37,6 +41,14 @@ internal sealed class ShellNavigationService : INavigationService
     public Task GoToHabitEditorAsync(Guid? habitId = null) => habitId is null
         ? GoAsync(Routes.HabitEditor)
         : GoAsync(Routes.HabitEditor, new Dictionary<string, object> { [Routes.HabitIdParameter] = habitId.Value });
+
+    public Task GoToEditProfileAsync() => GoAsync(Routes.EditProfile);
+
+    public Task GoToChangePasswordAsync() => GoAsync(Routes.ChangePassword);
+
+    public Task GoToSessionsAsync() => GoAsync(Routes.Sessions);
+
+    public Task GoToAdminUsersAsync() => GoAsync(Routes.AdminUsers);
 
     public Task GoBackAsync() => GoAsync("..");
 

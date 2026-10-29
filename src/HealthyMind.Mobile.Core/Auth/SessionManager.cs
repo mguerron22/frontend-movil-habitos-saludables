@@ -43,6 +43,9 @@ public interface ISessionManager : IAccessTokenSource
 
     /// <summary>Cierra la sesión y borra los datos locales del usuario.</summary>
     Task LogoutAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>El servidor devolvió el perfil cambiado: se usa desde ya y se guarda para entrar sin conexión.</summary>
+    Task UpdateCurrentUserAsync(UserProfile user);
 }
 
 public sealed record NewAccount(string Username, string Email, string FirstName, string LastName, string Password);
@@ -223,6 +226,12 @@ public sealed class SessionManager : ISessionManager, IDisposable
         settings.BiometricEnabled = false;
         settings.BiometricOffered = false;
         await database.ClearAllAsync();
+    }
+
+    public async Task UpdateCurrentUserAsync(UserProfile user)
+    {
+        CurrentUser = user;
+        await userCache.SaveAsync(user);
     }
 
     public void Dispose()

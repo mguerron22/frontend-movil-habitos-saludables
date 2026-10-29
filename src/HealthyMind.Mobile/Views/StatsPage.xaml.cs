@@ -1,20 +1,20 @@
-using HealthyMind.Mobile.Core.Auth;
+using HealthyMind.Mobile.Core.ViewModels;
 
 namespace HealthyMind.Mobile.Views;
 
 public partial class StatsPage : ContentPage
 {
-    private readonly ISessionManager _session;
+    private readonly StatsViewModel _viewModel;
 
-    public StatsPage(ISessionManager session)
+    public StatsPage(StatsViewModel viewModel)
     {
         InitializeComponent();
-        _session = session;
+        BindingContext = _viewModel = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        Header.Initials = _session.CurrentUser?.Initials ?? string.Empty;
+        await _viewModel.LoadAsync();
     }
 }

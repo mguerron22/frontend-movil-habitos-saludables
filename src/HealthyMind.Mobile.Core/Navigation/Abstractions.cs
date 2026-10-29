@@ -19,6 +19,16 @@ public interface INavigationService
     /// <summary>Formulario de hábito: nuevo si <paramref name="habitId"/> es null.</summary>
     Task GoToHabitEditorAsync(Guid? habitId = null);
 
+    Task GoToEditProfileAsync();
+
+    Task GoToChangePasswordAsync();
+
+    /// <summary>Dispositivos con la sesión abierta.</summary>
+    Task GoToSessionsAsync();
+
+    /// <summary>Administración de usuarios (solo Admin).</summary>
+    Task GoToAdminUsersAsync();
+
     Task GoBackAsync();
 }
 

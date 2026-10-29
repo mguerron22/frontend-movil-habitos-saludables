@@ -1,4 +1,3 @@
-using System.Net.Mail;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,8 +16,6 @@ public sealed partial class RegisterViewModel(
     BiometricEnrollment biometricEnrollment,
     INavigationService navigation) : ViewModelBase
 {
-    public const int PasswordMinLength = 8;
-
     [ObservableProperty]
     private string _firstName = string.Empty;
 
@@ -86,11 +83,11 @@ public sealed partial class RegisterViewModel(
 
     internal bool Validate()
     {
-        FirstNameError = Required(FirstName, "Escribe tu nombre.");
-        LastNameError = Required(LastName, "Escribe tu apellido.");
+        FirstNameError = AccountRules.Required(FirstName, "Escribe tu nombre.");
+        LastNameError = AccountRules.Required(LastName, "Escribe tu apellido.");
         UsernameError = ValidateUsername(Username);
-        EmailError = ValidateEmail(Email);
-        PasswordError = ValidatePassword(Password);
+        EmailError = AccountRules.Email(Email);
+        PasswordError = AccountRules.Password(Password);
         ConfirmPasswordError = Password == ConfirmPassword ? null : "Las contraseñas no coinciden.";
 
         return FirstNameError is null && LastNameError is null && UsernameError is null
@@ -119,9 +116,6 @@ public sealed partial class RegisterViewModel(
         }
     }
 
-    private static string? Required(string value, string message) =>
-        string.IsNullOrWhiteSpace(value) ? message : null;
-
     private static string? ValidateUsername(string value)
     {
         var username = value.Trim();
@@ -133,26 +127,6 @@ public sealed partial class RegisterViewModel(
         return UsernamePattern().IsMatch(username)
             ? null
             : "Solo letras, números, punto, guion y guion bajo.";
-    }
-
-    private static string? ValidateEmail(string value)
-    {
-        var email = value.Trim();
-        return email.Length > 0 && MailAddress.TryCreate(email, out var parsed) && parsed.Address == email
-            ? null
-            : "Escribe un correo válido.";
-    }
-
-    private static string? ValidatePassword(string value)
-    {
-        if (value.Length < PasswordMinLength)
-        {
-            return $"Mínimo {PasswordMinLength} caracteres.";
-        }
-
-        return value.Any(char.IsUpper) && value.Any(char.IsLower) && value.Any(char.IsDigit)
-            ? null
-            : "Usa al menos una mayúscula, una minúscula y un número.";
     }
 
     [GeneratedRegex("^[a-zA-Z0-9._-]+$")]

@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddSingleton<IUserCache, UserCache>();
         services.AddSingleton<IHabitStore, HabitStore>();
         services.AddSingleton<ISyncOutbox, SyncOutbox>();
+        services.AddSingleton<IRecommendationStore, RecommendationStore>();
 
         services.AddHttpClient(HealthServerProbe.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(3));
         services.AddSingleton<IServerProbe, HealthServerProbe>();
@@ -42,9 +43,13 @@ public static class DependencyInjection
         services.AddTransient<BiometricEnrollment>();
 
         services.AddTransient<SyncApi>();
+        services.AddTransient<ProfileApi>();
+        services.AddTransient<AdminUsersApi>();
         services.AddSingleton<SyncService>();
         services.AddSingleton<ISyncService>(provider => provider.GetRequiredService<SyncService>());
         services.AddSingleton<IHabitService, HabitService>();
+        services.AddSingleton<StepTracker>();
+        services.AddSingleton<RecordLocation>();
 
         services.AddTransient<StartupViewModel>();
         services.AddTransient<LoginViewModel>();
@@ -54,6 +59,12 @@ public static class DependencyInjection
         services.AddTransient<ProfileViewModel>();
         services.AddTransient<HabitsViewModel>();
         services.AddTransient<HabitEditorViewModel>();
+        services.AddTransient<StatsViewModel>();
+        services.AddTransient<InsightsViewModel>();
+        services.AddTransient<EditProfileViewModel>();
+        services.AddTransient<ChangePasswordViewModel>();
+        services.AddTransient<SessionsViewModel>();
+        services.AddTransient<AdminUsersViewModel>();
 
         return services;
     }

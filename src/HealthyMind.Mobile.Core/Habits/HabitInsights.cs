@@ -137,17 +137,25 @@ public static class HabitRules
 }
 
 /// <summary>Cómo se muestra cada categoría (nombre, ícono y colores del mock).</summary>
-public sealed record CategoryInfo(HabitCategory Category, string Name, string Icon, string TileColor, string ChipColor, string ChipTextColor)
+/// <param name="ChartColor">Color de la categoría en los gráficos (dona de distribución).</param>
+public sealed record CategoryInfo(
+    HabitCategory Category,
+    string Name,
+    string Icon,
+    string TileColor,
+    string ChipColor,
+    string ChipTextColor,
+    string ChartColor)
 {
     public static readonly IReadOnlyList<CategoryInfo> All =
     [
-        new(HabitCategory.Salud, "Salud", "cat_salud.png", "#FDE4E1", "#FDE4E1", "#B42318"),
-        new(HabitCategory.Ejercicio, "Ejercicio", "cat_ejercicio.png", "#FFE3D3", "#FFE3D3", "#C2410C"),
-        new(HabitCategory.Nutricion, "Nutrición", "cat_nutricion.png", "#E5F6D8", "#E5F6D8", "#3F7D20"),
-        new(HabitCategory.Lectura, "Lectura", "cat_lectura.png", "#E3F7F2", "#FFE3D3", "#C2410C"),
-        new(HabitCategory.Productividad, "Productividad", "cat_productividad.png", "#E6E9FB", "#E6E9FB", "#3F4BB5"),
-        new(HabitCategory.Bienestar, "Bienestar", "cat_bienestar.png", "#DDF7F1", "#FBEDE9", "#56625F"),
-        new(HabitCategory.Hidratacion, "Hidratación", "cat_hidratacion.png", "#DDF7F1", "#FBEDE9", "#56625F"),
+        new(HabitCategory.Salud, "Salud", "cat_salud.png", "#FDE4E1", "#FDE4E1", "#B42318", "#5FE3CC"),
+        new(HabitCategory.Ejercicio, "Ejercicio", "cat_ejercicio.png", "#FFE3D3", "#FFE3D3", "#C2410C", "#2EC4B6"),
+        new(HabitCategory.Nutricion, "Nutrición", "cat_nutricion.png", "#E5F6D8", "#E5F6D8", "#3F7D20", "#0E6B5E"),
+        new(HabitCategory.Lectura, "Lectura", "cat_lectura.png", "#E3F7F2", "#FFE3D3", "#C2410C", "#B9C4C1"),
+        new(HabitCategory.Productividad, "Productividad", "cat_productividad.png", "#E6E9FB", "#E6E9FB", "#3F4BB5", "#7C86E0"),
+        new(HabitCategory.Bienestar, "Bienestar", "cat_bienestar.png", "#DDF7F1", "#FBEDE9", "#56625F", "#F6B48A"),
+        new(HabitCategory.Hidratacion, "Hidratación", "cat_hidratacion.png", "#DDF7F1", "#FBEDE9", "#56625F", "#7DD3FC"),
     ];
 
     public static CategoryInfo For(HabitCategory category) => All.First(info => info.Category == category);

@@ -33,7 +33,8 @@ public interface IHabitService
     Task DeleteAsync(Guid id);
 
     /// <summary>Crea o actualiza el avance del día (0 deja el día sin cumplir).</summary>
-    Task<HabitRecordRow> RecordAsync(Guid habitId, DateOnly date, int value);
+    /// <param name="location">Dónde se registró, si el usuario lo permitió (RF03).</param>
+    Task<HabitRecordRow> RecordAsync(Guid habitId, DateOnly date, int value, GeoPoint? location = null);
 
     /// <summary>Hábitos de hoy con su avance y racha, para la pantalla de inicio.</summary>
     Task<TodaySummary> GetTodayAsync();
@@ -114,7 +115,7 @@ public sealed class HabitService(
         await QueueAsync(PendingEntity.Habit, habit.Id);
     }
 
-    public async Task<HabitRecordRow> RecordAsync(Guid habitId, DateOnly date, int value)
+    public async Task<HabitRecordRow> RecordAsync(Guid habitId, DateOnly date, int value, GeoPoint? location = null)
     {
         var habit = await GetAsync(habitId) ?? throw new UserMessageException("El hábito no existe.");
         if (date > Today())
@@ -143,6 +144,11 @@ public sealed class HabitService(
         record.Completed = value >= habit.Goal;
         record.IsDeleted = false;
         record.UpdatedAt = timeProvider.GetUtcNow();
+        if (location is not null)
+        {
+            record.Latitude = location.Latitude;
+            record.Longitude = location.Longitude;
+        }
 
         await store.SaveRecordAsync(record);
         await QueueAsync(PendingEntity.Record, record.Id);
