@@ -2,13 +2,17 @@
 <Application
     x:Class="HealthyMind.Mobile.App"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <controls:HexColorConverter x:Key="HexColor" />
+            <controls:InverseBoolConverter x:Key="Not" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

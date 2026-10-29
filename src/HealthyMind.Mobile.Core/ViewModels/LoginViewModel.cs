@@ -68,7 +68,8 @@ public sealed partial class LoginViewModel(
             "Servidor",
             "Dirección del backend. En un celular usa la IP de tu PC, por ejemplo http://192.168.1.20:5080",
             settings.ApiBaseUrl,
-            "http://192.168.1.20:5080");
+            "http://192.168.1.20:5080",
+            PromptKind.Url);
 
         if (value is null)
         {

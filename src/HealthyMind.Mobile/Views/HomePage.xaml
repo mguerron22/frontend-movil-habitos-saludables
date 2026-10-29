@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Inicio. Parte 1: encabezado, saludo y fecha. Parte 2: tarjeta de energía con anillo y lista de hábitos de hoy. -->
+<!-- Inicio: saludo, "Energía del día" con anillo y barra, y los hábitos de hoy con su check (mock 2). -->
 <ContentPage
     x:Class="HealthyMind.Mobile.Views.HomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -12,53 +12,188 @@
         <controls:AppHeader Section="Inicio" Initials="{Binding Initials}" />
         <controls:OfflineBanner Grid.Row="1" />
 
-        <ScrollView Grid.Row="2">
-            <VerticalStackLayout Padding="20,8,20,32" Spacing="18">
-                <VerticalStackLayout Spacing="6">
-                    <HorizontalStackLayout Spacing="6">
-                        <Image Source="ic_calendar.png" WidthRequest="16" HeightRequest="16" />
-                        <Label Text="{Binding TodayText}" Style="{StaticResource Caption}" FontFamily="OpenSansSemibold" />
-                    </HorizontalStackLayout>
-                    <Label Text="{Binding Greeting}" Style="{StaticResource Display}" FontSize="28" />
-                    <Label Text="Respira profundo y nutre tu bienestar paso a paso." Style="{StaticResource Body}" />
-                </VerticalStackLayout>
+        <RefreshView
+            Grid.Row="2"
+            Command="{Binding RefreshCommand}"
+            IsRefreshing="{Binding IsRefreshing}"
+            RefreshColor="{StaticResource Primary}">
+            <ScrollView>
+                <VerticalStackLayout Padding="20,8,20,110" Spacing="18">
+                    <VerticalStackLayout Spacing="6">
+                        <HorizontalStackLayout Spacing="6">
+                            <Image Source="ic_calendar.png" WidthRequest="16" HeightRequest="16" />
+                            <Label Text="{Binding TodayText}" Style="{StaticResource Caption}" FontFamily="OpenSansSemibold" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding Greeting}" Style="{StaticResource Display}" FontSize="28" />
+                        <Label Text="Respira profundo y nutre tu bienestar paso a paso." Style="{StaticResource Body}" />
+                    </VerticalStackLayout>
 
-                <!-- Energía del día: la parte 2 pone aquí el progreso real (x de y hábitos, anillo y barra). -->
-                <Border
-                    Background="{StaticResource EnergyGradient}"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 28"
-                    Padding="22">
-                    <Border.Shadow>
-                        <Shadow Brush="{StaticResource Primary}" Opacity="0.3" Radius="22" Offset="0,10" />
-                    </Border.Shadow>
-                    <VerticalStackLayout Spacing="10">
-                        <Border BackgroundColor="#33FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="10,4" HorizontalOptions="Start">
-                            <Label Text="✦  ENERGÍA DEL DÍA" TextColor="{StaticResource OnPrimary}" FontSize="12" FontFamily="OpenSansSemibold" />
+                    <!-- Energía del día -->
+                    <Border Background="{StaticResource EnergyGradient}" StrokeThickness="0" StrokeShape="RoundRectangle 28" Padding="22,20">
+                        <Border.Shadow>
+                            <Shadow Brush="{StaticResource Primary}" Opacity="0.3" Radius="22" Offset="0,10" />
+                        </Border.Shadow>
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" ColumnSpacing="12" RowSpacing="12">
+                            <Border Grid.ColumnSpan="2" BackgroundColor="#33FFFFFF" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="10,4" HorizontalOptions="Start">
+                                <Label Text="✦  ENERGÍA DEL DÍA" TextColor="{StaticResource OnPrimary}" FontSize="12" FontFamily="OpenSansSemibold" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Row="1" Spacing="6" VerticalOptions="Center">
+                                <Label Text="{Binding EnergyTitle}" TextColor="{StaticResource OnPrimary}" FontSize="28" FontAttributes="Bold" FontFamily="OpenSansSemibold" />
+                                <Label Text="{Binding Motivation}" TextColor="#E6FFFFFF" FontSize="14" />
+                            </VerticalStackLayout>
+
+                            <Grid Grid.Row="1" Grid.Column="1" WidthRequest="88" HeightRequest="88" VerticalOptions="Center">
+                                <controls:ProgressRing Progress="{Binding Progress}" Thickness="8" />
+                                <Label Text="{Binding RingText}" TextColor="{StaticResource OnPrimary}" FontSize="18" FontAttributes="Bold"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Grid>
+
+                            <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="Progreso diario" TextColor="#E6FFFFFF" FontSize="13" FontFamily="OpenSansSemibold" />
+                                    <Label Grid.Column="1" Text="{Binding ProgressPercent}" TextColor="{StaticResource OnPrimary}" FontSize="13" FontFamily="OpenSansSemibold" />
+                                </Grid>
+                                <controls:RoundedProgressBar Progress="{Binding Progress}" HeightRequest="10" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource SoftCard}" IsVisible="{Binding IsOfflineSession}">
+                        <Label Text="Entraste sin conexión: verás lo guardado en este teléfono y se sincronizará al volver el internet."
+                               TextColor="{StaticResource PrimaryDark}" FontSize="14" />
+                    </Border>
+
+                    <!-- Cambios hechos sin conexión que esperan al servidor (RNF05) -->
+                    <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource WarningSoft}" IsVisible="{Binding HasPendingSync}">
+                        <HorizontalStackLayout Spacing="6">
+                            <Image Source="ic_sync.png" WidthRequest="16" HeightRequest="16" />
+                            <Label Text="{Binding PendingSyncText}" TextColor="{StaticResource Warning}" FontSize="13" FontFamily="OpenSansSemibold" />
+                        </HorizontalStackLayout>
+                    </Border>
+
+                    <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="10">
+                        <Label Text="Hábitos de hoy" Style="{StaticResource Title}" VerticalOptions="Center" />
+                        <Border Grid.Column="1" Style="{StaticResource Chip}" BackgroundColor="{StaticResource InputBackground}" Padding="10,3" VerticalOptions="Center">
+                            <Label Text="{Binding ActiveHabitsText}" FontSize="12" TextColor="{StaticResource TextSecondary}" />
                         </Border>
-                        <Label Text="Tu progreso de hoy" TextColor="{StaticResource OnPrimary}" FontSize="26" FontAttributes="Bold" FontFamily="OpenSansSemibold" />
-                        <Label Text="Aquí verás cuántos hábitos llevas y cuánto te falta para un día completo."
-                               TextColor="#E6FFFFFF" FontSize="14" />
+                        <HorizontalStackLayout Grid.Column="2" HorizontalOptions="End" VerticalOptions="Center" Spacing="2">
+                            <HorizontalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SeeAllCommand}" />
+                            </HorizontalStackLayout.GestureRecognizers>
+                            <Label Text="Ver todos" Style="{StaticResource Link}" />
+                            <Image Source="ic_chevron_right.png" WidthRequest="16" HeightRequest="16" />
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- Sin hábitos todavía -->
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding HasNoHabits}">
+                        <VerticalStackLayout Spacing="10">
+                            <Image Source="ic_leaf.png" WidthRequest="32" HeightRequest="32" HorizontalOptions="Start" />
+                            <Label Text="Aún no tienes hábitos" Style="{StaticResource Subtitle}" />
+                            <Label Text="Crea el primero: tomar agua, caminar, leer... lo que te haga bien." Style="{StaticResource Body}" />
+                            <Button Text="Crear mi primer hábito" Style="{StaticResource SoftButton}" Command="{Binding AddHabitCommand}" HorizontalOptions="Start" Padding="20,0" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <VerticalStackLayout Spacing="12" BindableLayout.ItemsSource="{Binding TodayHabits}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TodayHabitItem">
+                                <Border Style="{StaticResource Card}" Padding="14">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding RecordValueCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                        <Border
+                                            WidthRequest="56"
+                                            HeightRequest="56"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 16"
+                                            BackgroundColor="{Binding Category.TileColor, Converter={StaticResource HexColor}}"
+                                            VerticalOptions="Center">
+                                            <Image Source="{Binding Category.Icon}" WidthRequest="28" HeightRequest="28" />
+                                        </Border>
+
+                                        <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                            <HorizontalStackLayout Spacing="8">
+                                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="8,2"
+                                                        BackgroundColor="{Binding Category.ChipColor, Converter={StaticResource HexColor}}">
+                                                    <Label Text="{Binding Category.Name}" FontSize="12"
+                                                           TextColor="{Binding Category.ChipTextColor, Converter={StaticResource HexColor}}" />
+                                                </Border>
+                                                <HorizontalStackLayout Spacing="3" IsVisible="{Binding HasStreak}" VerticalOptions="Center">
+                                                    <Image Source="ic_flame.png" WidthRequest="14" HeightRequest="14" />
+                                                    <Label Text="{Binding StreakText}" FontSize="12" TextColor="{StaticResource Fire}" FontFamily="OpenSansSemibold" />
+                                                </HorizontalStackLayout>
+                                            </HorizontalStackLayout>
+
+                                            <Label Text="{Binding Name}" FontSize="17" FontFamily="OpenSansSemibold" FontAttributes="Bold" LineBreakMode="TailTruncation">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsCompleted}" Value="True">
+                                                        <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                        <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+
+                                            <HorizontalStackLayout Spacing="4">
+                                                <Image Source="ic_target.png" WidthRequest="14" HeightRequest="14" />
+                                                <Label Text="{Binding GoalText}" Style="{StaticResource Caption}" />
+                                            </HorizontalStackLayout>
+                                            <Label Text="{Binding ProgressText}" IsVisible="{Binding HasProgress}" FontSize="12" TextColor="{StaticResource Primary}" FontFamily="OpenSansSemibold" />
+                                        </VerticalStackLayout>
+
+                                        <!-- Check del mock: verde y con visto si está cumplido, círculo vacío si no -->
+                                        <ImageButton
+                                            Grid.Column="2"
+                                            WidthRequest="48"
+                                            HeightRequest="48"
+                                            CornerRadius="24"
+                                            Padding="10"
+                                            VerticalOptions="Center"
+                                            BorderWidth="2"
+                                            Command="{Binding ToggleCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                                            CommandParameter="{Binding .}"
+                                            SemanticProperties.Description="Marcar como cumplido">
+                                            <ImageButton.Triggers>
+                                                <DataTrigger TargetType="ImageButton" Binding="{Binding IsCompleted}" Value="True">
+                                                    <Setter Property="Source" Value="ic_check_white.png" />
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource Primary}" />
+                                                    <Setter Property="BorderColor" Value="{StaticResource Primary}" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="ImageButton" Binding="{Binding IsCompleted}" Value="False">
+                                                    <Setter Property="Source" Value="ic_check_muted.png" />
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource InputBackground}" />
+                                                    <Setter Property="BorderColor" Value="{StaticResource Divider}" />
+                                                </DataTrigger>
+                                            </ImageButton.Triggers>
+                                        </ImageButton>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
 
-                <Border Style="{StaticResource SoftCard}" IsVisible="{Binding IsOfflineSession}">
-                    <Label Text="Entraste sin conexión: verás lo guardado en este teléfono y se sincronizará al volver el internet."
-                           TextColor="{StaticResource PrimaryDark}" FontSize="14" />
-                </Border>
-
-                <HorizontalStackLayout Spacing="10">
-                    <Label Text="Hábitos de hoy" Style="{StaticResource Title}" />
-                </HorizontalStackLayout>
-
-                <Border Style="{StaticResource Card}">
-                    <VerticalStackLayout Spacing="8">
-                        <Image Source="ic_leaf.png" WidthRequest="32" HeightRequest="32" HorizontalOptions="Start" />
-                        <Label Text="Tu lista de hoy aparecerá aquí" Style="{StaticResource Subtitle}" />
-                        <Label Text="Crea hábitos y márcalos con un toque cada día." Style="{StaticResource Body}" />
-                    </VerticalStackLayout>
-                </Border>
-            </VerticalStackLayout>
-        </ScrollView>
+        <!-- Botón flotante "+" menta, como en el mock -->
+        <Button
+            Grid.Row="2"
+            Text="+"
+            FontSize="30"
+            TextColor="{StaticResource PrimaryDark}"
+            BackgroundColor="{StaticResource Mint}"
+            WidthRequest="60"
+            HeightRequest="60"
+            CornerRadius="30"
+            Padding="0"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="0,0,20,20"
+            Command="{Binding AddHabitCommand}"
+            SemanticProperties.Description="Nuevo hábito" />
     </Grid>
 </ContentPage>

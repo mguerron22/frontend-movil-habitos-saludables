@@ -159,8 +159,8 @@ public sealed class SessionManagerTests : IDisposable
     public void Dispose()
     {
         _session.Dispose();
+        _database.CloseAsync().GetAwaiter().GetResult();
         _database.Dispose();
-        SQLite.SQLiteAsyncConnection.ResetPool();
         File.Delete(_databasePath);
     }
 }

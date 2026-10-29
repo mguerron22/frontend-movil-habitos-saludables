@@ -49,15 +49,29 @@ public sealed class LocalDatabase(string databasePath) : IDisposable
         }
     }
 
+    /// <summary>Cierra solo esta conexión (no el pool global de sqlite-net, que comparten otras instancias).</summary>
+    public async Task CloseAsync()
+    {
+        if (_connection is not null)
+        {
+            await _connection.CloseAsync();
+            _connection = null;
+        }
+    }
+
     public void Dispose() => _initLock.Dispose();
 }
 
-/// <summary>Tablas locales. Las partes 2 y 3 agregan aquí las suyas (hábitos, registros, cola de sincronización...).</summary>
+/// <summary>Tablas locales. Si un módulo necesita guardar algo sin conexión, agrega aquí su tabla.</summary>
 public static class LocalSchema
 {
     public static IReadOnlyList<Type> Tables { get; } =
     [
         typeof(CachedUserRow),
+        typeof(HabitRow),
+        typeof(HabitRecordRow),
+        typeof(PendingChangeRow),
+        typeof(SyncStateRow),
     ];
 }
 

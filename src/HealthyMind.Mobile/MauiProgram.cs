@@ -57,6 +57,7 @@ public static class MauiProgram
         services.AddSingleton<INetworkStatus, MauiNetworkStatus>();
         services.AddSingleton<INavigationService, ShellNavigationService>();
         services.AddSingleton<IDialogService, ShellDialogService>();
+        services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
 #if ANDROID
         services.AddSingleton<IBiometricAuthenticator, Platforms.Android.AndroidBiometricAuthenticator>();
 #elif WINDOWS
@@ -73,6 +74,7 @@ public static class MauiProgram
         services.AddTransient<UnlockPage>();
         services.AddTransient<HomePage>();
         services.AddTransient<HabitsPage>();
+        services.AddTransient<HabitEditorPage>();
         services.AddTransient<StatsPage>();
         services.AddTransient<InsightsPage>();
         services.AddTransient<ProfilePage>();

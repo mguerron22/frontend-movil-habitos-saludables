@@ -2,7 +2,7 @@
 
 App Android en .NET MAUI puro para el backend
 [backend-movil-habitos-saludables](https://github.com/mguerron22/backend-movil-habitos-saludables).
-Se construye en **3 partes**, una por integrante; este README dice qué hace cada una y dónde.
+Se construye en **dos mitades**, una por integrante; este README dice qué hace cada una y dónde.
 
 ## Estructura
 
@@ -68,36 +68,40 @@ Así se prueba sin emulador y la arquitectura queda igual que en el backend.
 - **Sesión vencida o cuenta suspendida:** la app vuelve sola al login con el motivo.
 - Cualquier llamada con `AuthenticatedApiClient` lleva el token y, si recibe 401, renueva y reintenta una vez.
 
-## Las 3 partes
+## Reparto (2 integrantes, 50 % cada uno)
 
-| Parte | Integrante | Alcance |
+| Mitad | Integrante | Alcance |
 |---|---|---|
-| **1** ✅ | Martín | Base del proyecto, tema y estilos del mock, cliente API, sesión y huella, SQLite, aviso sin internet, Login, Registro, Desbloqueo, menú de pestañas, Perfil básico (huella y cerrar sesión) |
-| **2** | — | Inicio y Hábitos |
-| **3** | — | Estadísticas, IA y Perfil completo |
+| **1** ✅ | Martín | Base del proyecto, estilos del mock, cliente API, sesión y huella, aviso sin internet, Login, Registro, Desbloqueo, Perfil básico **+ Hábitos, Inicio completo y sincronización sin conexión** |
+| **2** | (compañero) | Estadísticas, IA, Perfil completo y administración, pasos y ubicación |
 
-### Parte 2 — Inicio y Hábitos (RF02, RF03, RF06, RNF05)
+### Lo que ya está (mitad 1): hábitos y sin conexión
 
-- **Hábitos** (`Views/HabitsPage`, hoy reservada): lista con filtros, crear y editar (nombre, categoría, meta, unidad,
-  días, `trackingMode`), pausar y eliminar. Usa `FormField` para el formulario y los endpoints `/api/habits`.
-- **Inicio** (`Views/HomePage` + `HomeViewModel`): completar la tarjeta "Energía del día" (x de y hábitos, anillo de
-  progreso dibujado con `GraphicsView`, barra) con `GET /api/statistics/dashboard`; lista "Hábitos de hoy" con chip de
-  categoría, racha y botón de check que registra el día (`PUT /api/habits/{id}/records/{fecha}`); botón flotante "+".
-- **Ubicación opcional** al registrar (`Geolocation` de MAUI → `latitude`/`longitude`).
-- **Pasos** (RF06): para hábitos `StepCounter`, leer el podómetro de Android y reportarlo con el mismo PUT.
-- **Sin conexión** (lo más importante): tablas en `Data/LocalSchema` para hábitos, registros y una **cola de cambios
-  pendientes**; leer siempre de SQLite; al volver la conexión (`IConnectivityService.StatusChanged`) hacer
-  `POST /api/sync/push` y luego `GET /api/sync/pull?since=…`. El contrato exacto está en el README del backend
-  (Applied / Stale / Rejected, `serverId`, ids GUID generados en el teléfono).
+- **Primero local:** las pantallas leen y escriben siempre en SQLite (`Data/HabitStore`). Cada cambio entra a una
+  cola (`Data/SyncOutbox`) y `Sync/SyncService` la envía (`/api/sync/push`) y luego descarga lo nuevo
+  (`/api/sync/pull`). Sin internet todo funciona igual y se envía solo al volver la conexión.
+- Para crear, editar, pausar, borrar o registrar avance se usa **siempre `IHabitService`**: guarda local, encola y pide
+  sincronizar. No llamar a los endpoints de hábitos directamente.
+- `HabitInsights` calcula sobre lo local el progreso de hoy y las rachas.
+- Controles para reutilizar: `ProgressRing` (anillo) y `RoundedProgressBar` (barra), dibujados con `GraphicsView`;
+  `CategoryInfo` trae nombre, ícono y colores de cada categoría.
 
-### Parte 3 — Estadísticas, IA y Perfil (RF01, RF04, RF05)
+### Mitad 2 — Estadísticas, IA, Perfil y sensores (RF01, RF04, RF05, RF06, RF03)
 
-- **Stats** (`Views/StatsPage`): consistencia global, círculos L–D de la semana, barras "Ritmo semanal" y dona
-  "Distribución por dimensión", todo con `GraphicsView`. Endpoints `/api/statistics/weekly|monthly|range`.
-- **IA** (`Views/InsightsPage`): "Tu Brújula Diaria" con `GET /api/recommendations/latest` e historial. Las
-  recomendaciones las genera el backend solo; guardarlas en SQLite para leerlas sin conexión (vienen en el pull).
-- **Perfil completo** (`ProfilePage` + `ProfileViewModel`): editar datos, cambiar contraseña, dispositivos con sesión
-  (`/api/auth/sessions`) y, si `IsAdmin`, la vista de administración: buscar, suspender y reactivar cuentas.
+- **Stats** (`Views/StatsPage`, hoy reservada): consistencia global, círculos L–D de la semana, barras "Ritmo semanal"
+  y dona "Distribución por dimensión" (mock 3). Con conexión: `/api/statistics/weekly|monthly|range`; sin conexión se
+  puede calcular con los datos de `IHabitStore`, como hace `HabitInsights`. Para dibujar, partir de `ProgressRing`.
+- **IA** (`Views/InsightsPage`, hoy reservada): "Tu Brújula Diaria" (mock 4) con `GET /api/recommendations/latest` e
+  historial (`/api/recommendations`). Las recomendaciones las genera el backend solo; para verlas sin conexión,
+  agregar una tabla en `LocalSchema` y guardarlas.
+- **Perfil completo** (`ProfilePage` + `ProfileViewModel`): editar datos (`PUT /api/profile`), cambiar contraseña
+  (`PUT /api/profile/password`), dispositivos con sesión (`/api/auth/sessions`) y, si `IsAdmin`, administración:
+  buscar, suspender y reactivar cuentas (`/api/admin/users`).
+- **Pasos** (RF06): los hábitos con `TrackingMode.StepCounter` ya existen y el inicio pide el valor a mano. Falta leer
+  el podómetro de Android (sensor `StepCounter`, permiso `ACTIVITY_RECOGNITION`) y guardar el conteo del día con
+  `IHabitService.RecordAsync`.
+- **Ubicación opcional** (RF03): los registros ya tienen `Latitude`/`Longitude` en SQLite y en la sincronización.
+  Falta pedirla con `Geolocation` de MAUI al registrar (con permiso y opción de no compartirla).
 
 ### Para cualquier parte
 

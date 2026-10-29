@@ -9,7 +9,8 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        // Pantallas que se apilan encima de otra (con "atrás"). Las partes 2 y 3 registran aquí las suyas.
+        // Pantallas que se apilan encima de otra (con "atrás"). Las pantallas nuevas registran aquí la suya.
         Routing.RegisterRoute(Routes.Register, typeof(RegisterPage));
+        Routing.RegisterRoute(Routes.HabitEditor, typeof(HabitEditorPage));
     }
 }

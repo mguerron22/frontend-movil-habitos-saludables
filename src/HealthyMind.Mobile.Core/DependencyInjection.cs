@@ -2,6 +2,8 @@ using HealthyMind.Mobile.Core.Api;
 using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Connectivity;
 using HealthyMind.Mobile.Core.Data;
+using HealthyMind.Mobile.Core.Habits;
+using HealthyMind.Mobile.Core.Sync;
 using HealthyMind.Mobile.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,13 +15,15 @@ public static class DependencyInjection
 
     /// <summary>
     /// Registra la lógica de la app. La plataforma (MAUI) debe registrar antes: IAppSettings, ISecureTokenStore,
-    /// INetworkStatus, IBiometricAuthenticator, INavigationService e IDialogService.
+    /// INetworkStatus, IBiometricAuthenticator, INavigationService, IDialogService e IUiDispatcher.
     /// </summary>
     public static IServiceCollection AddHealthyMindCore(this IServiceCollection services, string databasePath)
     {
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton(_ => new LocalDatabase(databasePath));
         services.AddSingleton<IUserCache, UserCache>();
+        services.AddSingleton<IHabitStore, HabitStore>();
+        services.AddSingleton<ISyncOutbox, SyncOutbox>();
 
         services.AddHttpClient(HealthServerProbe.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(3));
         services.AddSingleton<IServerProbe, HealthServerProbe>();
@@ -37,12 +41,19 @@ public static class DependencyInjection
         services.AddSingleton<IAccessTokenSource>(provider => provider.GetRequiredService<SessionManager>());
         services.AddTransient<BiometricEnrollment>();
 
+        services.AddTransient<SyncApi>();
+        services.AddSingleton<SyncService>();
+        services.AddSingleton<ISyncService>(provider => provider.GetRequiredService<SyncService>());
+        services.AddSingleton<IHabitService, HabitService>();
+
         services.AddTransient<StartupViewModel>();
         services.AddTransient<LoginViewModel>();
         services.AddTransient<RegisterViewModel>();
         services.AddTransient<UnlockViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<ProfileViewModel>();
+        services.AddTransient<HabitsViewModel>();
+        services.AddTransient<HabitEditorViewModel>();
 
         return services;
     }

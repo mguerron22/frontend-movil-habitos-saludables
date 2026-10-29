@@ -130,7 +130,7 @@ public sealed class ViewModelTests
             return Task.FromResult(accept);
         }
 
-        public Task<string?> PromptAsync(string title, string message, string? initialValue, string placeholder) =>
+        public Task<string?> PromptAsync(string title, string message, string? initialValue, string placeholder, PromptKind kind = PromptKind.Text) =>
             Task.FromResult<string?>(null);
     }
 }

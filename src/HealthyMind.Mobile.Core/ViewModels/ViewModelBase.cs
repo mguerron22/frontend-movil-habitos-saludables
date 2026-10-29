@@ -47,6 +47,11 @@ public abstract partial class ViewModelBase : ObservableObject
             ErrorMessage = OfflineMessage;
             return false;
         }
+        catch (UserMessageException exception)
+        {
+            OnUserMessage(exception);
+            return false;
+        }
         catch (SessionExpiredException exception)
         {
             // La app ya navega al login al enterarse; aquí solo se deja el motivo.
@@ -61,4 +66,6 @@ public abstract partial class ViewModelBase : ObservableObject
 
     /// <summary>Las pantallas con formularios lo sobrescriben para marcar los campos con error.</summary>
     protected virtual void OnApiError(ApiException exception) => ErrorMessage = exception.Message;
+
+    protected virtual void OnUserMessage(UserMessageException exception) => ErrorMessage = exception.Message;
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Pestaña reservada: la construye la parte 3 del frontend. -->
+<!-- Pestaña reservada: la construye la mitad 2 del frontend. -->
 <ContentPage
     x:Class="HealthyMind.Mobile.Views.StatsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -17,7 +17,7 @@
                     <Image Source="tab_stats.png" WidthRequest="32" HeightRequest="32" HorizontalOptions="Start" />
                     <Label Text="Consistencia global, ritmo semanal y distribución por dimensión de tus hábitos." Style="{StaticResource Body}" />
                     <Border Style="{StaticResource Chip}">
-                        <Label Text="En construcción · Parte 3" Style="{StaticResource ChipText}" />
+                        <Label Text="En construcción · Mitad 2" Style="{StaticResource ChipText}" />
                     </Border>
                 </VerticalStackLayout>
             </Border>
