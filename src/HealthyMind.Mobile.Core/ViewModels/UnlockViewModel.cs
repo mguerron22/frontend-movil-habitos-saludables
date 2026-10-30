@@ -16,8 +16,8 @@ public sealed partial class UnlockViewModel(
     IUserCache userCache,
     INavigationService navigation) : ViewModelBase
 {
-    // Evita dos diálogos de huella seguidos (la pantalla puede "aparecer" dos veces al navegar).
-    private bool _prompting;
+    /// <summary>Diálogo de huella en curso; un toque nuevo lo cancela y abre otro.</summary>
+    private CancellationTokenSource? _prompt;
 
     [ObservableProperty]
     private string _greeting = "¡Hola de nuevo!";
@@ -35,25 +35,31 @@ public sealed partial class UnlockViewModel(
         }
     }
 
-    [RelayCommand]
+    /// <summary>
+    /// Pide la huella. Si Android descartó el diálogo sin avisar (pasa al volver del fondo), tocar otra vez
+    /// cancela ese intento y abre uno nuevo: la huella nunca queda trabada hasta reiniciar la app.
+    /// </summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
     private async Task UnlockAsync()
     {
-        if (IsBusy || _prompting)
+        if (IsBusy)
         {
             return;
         }
 
+        var previous = _prompt;
+        using var prompt = new CancellationTokenSource();
+        _prompt = prompt;
+        previous?.Cancel();
         ErrorMessage = null;
-        BiometricResult result;
-        _prompting = true;
-        try
+
+        var result = await biometric.AuthenticateAsync("Desbloquear HealthyMindIA", "Usa tu huella para entrar", prompt.Token);
+        if (_prompt != prompt)
         {
-            result = await biometric.AuthenticateAsync("Desbloquear HealthyMindIA", "Usa tu huella para entrar");
+            return; // Lo reemplazó un toque más nuevo.
         }
-        finally
-        {
-            _prompting = false;
-        }
+
+        _prompt = null;
 
         if (!result.Succeeded)
         {

@@ -82,32 +82,44 @@ public sealed class ViewModelTests
     }
 
     [Fact]
-    public async Task Unlock_never_opens_two_fingerprint_dialogs_at_once()
+    public async Task A_new_tap_replaces_a_fingerprint_dialog_that_never_answered()
     {
-        var biometric = new SlowBiometric();
+        var biometric = new SilentBiometric();
         var vm = new UnlockViewModel(null!, biometric, null!, null!);
 
+        // Android descartó el primer diálogo sin avisar: sin el arreglo, el botón quedaba trabado.
         var first = vm.UnlockCommand.ExecuteAsync(null);
         var second = vm.UnlockCommand.ExecuteAsync(null);
-        biometric.Release.SetResult(new BiometricResult(BiometricOutcome.Cancelled));
-        await Task.WhenAll(first, second);
 
-        Assert.Equal(1, biometric.Prompts);
+        Assert.Equal(2, biometric.Prompts.Count);
+        Assert.True(biometric.Prompts[0].IsCancellationRequested);
+        Assert.False(biometric.Prompts[1].IsCancellationRequested);
+        await first;
+
+        biometric.Answer(new BiometricResult(BiometricOutcome.Failed, "Huella no reconocida."));
+        await second;
+        Assert.Equal("Huella no reconocida.", vm.ErrorMessage);
     }
 
-    private sealed class SlowBiometric : IBiometricAuthenticator
+    /// <summary>Como el BiometricPrompt descartado: solo termina si se cancela o si se le responde a mano.</summary>
+    private sealed class SilentBiometric : IBiometricAuthenticator
     {
-        public TaskCompletionSource<BiometricResult> Release { get; } = new();
+        private TaskCompletionSource<BiometricResult>? _current;
 
-        public int Prompts { get; private set; }
+        public List<CancellationToken> Prompts { get; } = [];
 
         public Task<bool> IsAvailableAsync() => Task.FromResult(true);
 
         public Task<BiometricResult> AuthenticateAsync(string title, string subtitle, CancellationToken cancellationToken = default)
         {
-            Prompts++;
-            return Release.Task;
+            Prompts.Add(cancellationToken);
+            var completion = new TaskCompletionSource<BiometricResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+            cancellationToken.Register(() => completion.TrySetResult(new BiometricResult(BiometricOutcome.Cancelled)));
+            _current = completion;
+            return completion.Task;
         }
+
+        public void Answer(BiometricResult result) => _current!.TrySetResult(result);
     }
 
     private sealed class StubBiometric(bool available) : IBiometricAuthenticator
