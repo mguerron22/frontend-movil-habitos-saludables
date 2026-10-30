@@ -62,8 +62,8 @@
                         </FlexLayout>
                     </VerticalStackLayout>
 
-                    <!-- Cómo se mide: a mano o con el contador de pasos del teléfono (RF06) -->
-                    <Border Style="{StaticResource SoftCard}" Padding="14,10">
+                    <!-- Cómo se mide: a mano o con el contador de pasos del teléfono (RF06); solo en Ejercicio -->
+                    <Border Style="{StaticResource SoftCard}" Padding="14,10" IsVisible="{Binding CanCountSteps}">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <Image Source="ic_steps.png" WidthRequest="22" HeightRequest="22" />
                             <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
@@ -93,10 +93,11 @@
 
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Días" Style="{StaticResource FieldLabel}" />
-                        <HorizontalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Days}">
+                        <!-- Los 7 días se reparten el ancho: en teléfonos angostos el domingo no se sale de la pantalla -->
+                        <FlexLayout JustifyContent="SpaceBetween" BindableLayout.ItemsSource="{Binding Days}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="vm:DayOption">
-                                    <Border WidthRequest="38" HeightRequest="38" StrokeThickness="0" StrokeShape="Ellipse" BackgroundColor="{StaticResource InputBackground}">
+                                    <Border WidthRequest="36" HeightRequest="36" StrokeThickness="0" StrokeShape="Ellipse" BackgroundColor="{StaticResource InputBackground}">
                                         <Border.GestureRecognizers>
                                             <TapGestureRecognizer
                                                 Command="{Binding ToggleDayCommand, Source={RelativeSource AncestorType={x:Type vm:HabitEditorViewModel}}, x:DataType=vm:HabitEditorViewModel}"
@@ -117,7 +118,7 @@
                                     </Border>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
-                        </HorizontalStackLayout>
+                        </FlexLayout>
                     </VerticalStackLayout>
 
                     <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">

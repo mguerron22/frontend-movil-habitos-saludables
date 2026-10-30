@@ -26,6 +26,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
     private readonly TimeProvider _timeProvider;
     private readonly StepTracker _steps;
     private readonly RecordLocation _location;
+    private readonly SemaphoreSlim _counterGate = new(1, 1);
 
     [ObservableProperty]
     private string _greeting = string.Empty;
@@ -120,6 +121,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
     {
         _session.OnlineRestored -= OnOnlineRestored;
         _sync.Completed -= OnSyncCompleted;
+        _counterGate.Dispose();
     }
 
     /// <summary>Check del mock: marca la meta completa, o la desmarca si ya estaba cumplida.</summary>
@@ -167,6 +169,12 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
             await ReloadHabitsAsync();
         });
     }
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private Task AddOneAsync(TodayHabitItem item) => ChangeByAsync(item, 1);
+
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private Task RemoveOneAsync(TodayHabitItem item) => ChangeByAsync(item, -1);
 
     [RelayCommand]
     private Task AddHabitAsync() => _navigation.GoToHabitEditorAsync();
@@ -224,6 +232,27 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         catch (UserMessageException)
         {
             // P. ej. el hábito se pausó desde otro teléfono justo ahora: se ignora hasta la próxima lectura.
+        }
+    }
+
+    /// <summary>
+    /// −1 / +1 sin teclado. Los toques rápidos se encolan en vez de perderse: cada uno parte de lo ya guardado.
+    /// </summary>
+    private async Task ChangeByAsync(TodayHabitItem item, int amount)
+    {
+        await _counterGate.WaitAsync();
+        try
+        {
+            await _habits.AddAsync(item.Id, Today(), amount, await _location.CurrentIfEnabledAsync());
+            await ReloadHabitsAsync();
+        }
+        catch (UserMessageException exception)
+        {
+            await _dialogs.AlertAsync(item.Name, exception.Message);
+        }
+        finally
+        {
+            _counterGate.Release();
         }
     }
 

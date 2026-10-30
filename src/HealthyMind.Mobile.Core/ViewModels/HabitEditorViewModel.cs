@@ -75,6 +75,11 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
 
     public string PauseText => IsActive ? "Pausar hábito" : "Reactivar hábito";
 
+    /// <summary>El interruptor de pasos solo se muestra con la categoría Ejercicio.</summary>
+    public bool CanCountSteps => HabitRules.SupportsStepCounter(SelectedCategory);
+
+    private HabitCategory SelectedCategory => Categories.First(option => option.IsSelected).Info.Category;
+
     public async Task LoadAsync(Guid? habitId)
     {
         _habitId = habitId;
@@ -103,6 +108,8 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
             option.IsSelected = option.Info.Category == habit.Category;
         }
 
+        OnPropertyChanged(nameof(CanCountSteps));
+
         var scheduled = habit.GetScheduledDays();
         foreach (var day in Days)
         {
@@ -115,8 +122,7 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
     {
         if (value)
         {
-            Unit = "pasos";
-            Categories.ToList().ForEach(option => option.IsSelected = option.Info.Category == HabitCategory.Ejercicio);
+            Unit = HabitRules.StepUnit;
             if (Goal is "1" or "")
             {
                 Goal = "6000";
@@ -130,6 +136,15 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
         foreach (var item in Categories)
         {
             item.IsSelected = item == option;
+        }
+
+        OnPropertyChanged(nameof(CanCountSteps));
+
+        // Al salir de Ejercicio se vuelve a medir a mano; "pasos" ya no tiene sentido como unidad.
+        if (!CanCountSteps && UsesStepCounter)
+        {
+            UsesStepCounter = false;
+            Unit = string.Empty;
         }
     }
 
@@ -157,11 +172,11 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
         var draft = new HabitDraft(
             _habitId,
             Name,
-            Categories.First(option => option.IsSelected).Info.Category,
+            SelectedCategory,
             goal,
             Unit,
             Days.Where(day => day.IsSelected).Select(day => day.Day).ToList(),
-            UsesStepCounter ? TrackingMode.StepCounter : TrackingMode.Manual);
+            UsesStepCounter && CanCountSteps ? TrackingMode.StepCounter : TrackingMode.Manual);
 
         if (await RunAsync(() => _habits.SaveAsync(draft)))
         {

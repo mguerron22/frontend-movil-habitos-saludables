@@ -95,6 +95,23 @@ public sealed class HabitServiceTests : LocalDataTest
     }
 
     [Fact]
+    public async Task Plus_and_minus_one_build_on_what_is_saved_and_never_go_below_zero()
+    {
+        var habit = await _service.SaveAsync(Water());
+
+        await _service.AddAsync(habit.Id, Today, -1);
+        Assert.Equal(0, (await Store.FindRecordAsync(habit.Id, Today))!.CompletedValue);
+
+        await _service.RecordAsync(habit.Id, Today, 6);
+        await _service.AddAsync(habit.Id, Today, 1);
+        await _service.AddAsync(habit.Id, Today, -1);
+        var record = await _service.AddAsync(habit.Id, Today, 2);
+
+        Assert.Equal(8, record.CompletedValue);
+        Assert.True(record.Completed);
+    }
+
+    [Fact]
     public async Task Paused_habit_cannot_start_a_new_day()
     {
         var habit = await _service.SaveAsync(Water());

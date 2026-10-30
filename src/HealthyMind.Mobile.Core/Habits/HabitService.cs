@@ -36,6 +36,9 @@ public interface IHabitService
     /// <param name="location">Dónde se registró, si el usuario lo permitió (RF03).</param>
     Task<HabitRecordRow> RecordAsync(Guid habitId, DateOnly date, int value, GeoPoint? location = null);
 
+    /// <summary>Suma o resta al avance del día (botones +1 / −1 de Inicio), partiendo de lo ya guardado; nunca baja de 0.</summary>
+    Task<HabitRecordRow> AddAsync(Guid habitId, DateOnly date, int amount, GeoPoint? location = null);
+
     /// <summary>Hábitos de hoy con su avance y racha, para la pantalla de inicio.</summary>
     Task<TodaySummary> GetTodayAsync();
 }
@@ -153,6 +156,13 @@ public sealed class HabitService(
         await store.SaveRecordAsync(record);
         await QueueAsync(PendingEntity.Record, record.Id);
         return record;
+    }
+
+    public async Task<HabitRecordRow> AddAsync(Guid habitId, DateOnly date, int amount, GeoPoint? location = null)
+    {
+        var record = await store.FindRecordAsync(habitId, date);
+        var current = record is { IsDeleted: false } ? record.CompletedValue : 0;
+        return await RecordAsync(habitId, date, (int)Math.Clamp((long)current + amount, 0, HabitRules.MaxRecordValue), location);
     }
 
     public async Task<TodaySummary> GetTodayAsync()

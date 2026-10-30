@@ -93,6 +93,10 @@ public static class HabitRules
     public const int UnitMaxLength = 30;
     public const int MaxGoal = 1_000_000;
     public const int MaxRecordValue = 10_000_000;
+    public const string StepUnit = "pasos";
+
+    /// <summary>Solo los hábitos de ejercicio se pueden medir con el contador de pasos (RF06).</summary>
+    public static bool SupportsStepCounter(HabitCategory category) => category == HabitCategory.Ejercicio;
 
     public static IReadOnlyDictionary<string, string> Validate(HabitDraft draft, IEnumerable<string> otherNames)
     {

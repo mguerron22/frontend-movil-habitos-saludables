@@ -105,7 +105,7 @@
                                             Command="{Binding RecordValueCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
                                             CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="14">
                                         <Border
                                             WidthRequest="56"
                                             HeightRequest="56"
@@ -170,6 +170,37 @@
                                                 </DataTrigger>
                                             </ImageButton.Triggers>
                                         </ImageButton>
+
+                                        <!-- −1 / +1 para metas que se cuentan (vasos): sin teclado -->
+                                        <Border Grid.Row="1" Grid.ColumnSpan="3" Margin="0,12,0,0" Padding="6" IsVisible="{Binding IsCountable}"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 24" BackgroundColor="{StaticResource InputBackground}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto">
+                                                <Button
+                                                    Style="{StaticResource SoftButton}"
+                                                    Text="−1"
+                                                    WidthRequest="64"
+                                                    HeightRequest="40"
+                                                    CornerRadius="20"
+                                                    Padding="0"
+                                                    IsEnabled="{Binding CanRemoveOne}"
+                                                    Command="{Binding RemoveOneCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                                                    CommandParameter="{Binding .}"
+                                                    SemanticProperties.Description="Restar uno" />
+                                                <Label Grid.Column="1" Text="{Binding CounterText}" FontFamily="OpenSansSemibold" FontSize="15"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                                <Button
+                                                    Grid.Column="2"
+                                                    Style="{StaticResource PrimaryButton}"
+                                                    Text="+1"
+                                                    WidthRequest="64"
+                                                    HeightRequest="40"
+                                                    CornerRadius="20"
+                                                    Padding="0"
+                                                    Command="{Binding AddOneCommand, Source={RelativeSource AncestorType={x:Type vm:HomeViewModel}}, x:DataType=vm:HomeViewModel}"
+                                                    CommandParameter="{Binding .}"
+                                                    SemanticProperties.Description="Sumar uno" />
+                                            </Grid>
+                                        </Border>
                                     </Grid>
                                 </Border>
                             </DataTemplate>

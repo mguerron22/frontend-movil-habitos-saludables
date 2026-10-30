@@ -23,6 +23,14 @@ public sealed partial class TodayHabitItem(TodayHabit today) : ObservableObject
 
     public bool IsStepCounter => today.Habit.TrackingMode == TrackingMode.StepCounter;
 
+    /// <summary>Botones −1 / +1 para metas que se cuentan (8 vasos); no en pasos ni en metas de una sola vez.</summary>
+    public bool IsCountable => !IsStepCounter && Goal > 1;
+
+    public bool CanRemoveOne => today.Value > 0;
+
+    /// <summary>"5 / 8 vasos" entre los botones.</summary>
+    public string CounterText => $"{today.Value.ToString("N0", HomeViewModel.Spanish)} / {HabitFormat.Amount(today.Habit.Goal, today.Habit.Unit)}";
+
     public CategoryInfo Category { get; } = CategoryInfo.For(today.Habit.Category);
 
     public string GoalText => $"Meta: {HabitFormat.Amount(today.Habit.Goal, today.Habit.Unit)}";
@@ -32,7 +40,8 @@ public sealed partial class TodayHabitItem(TodayHabit today) : ObservableObject
         ? $"{today.Value.ToString("N0", HomeViewModel.Spanish)} de {HabitFormat.Amount(today.Habit.Goal, today.Habit.Unit)}"
         : null;
 
-    public bool HasProgress => ProgressText is not null;
+    /// <summary>En los hábitos que se cuentan el avance ya se ve entre los botones −1 / +1.</summary>
+    public bool HasProgress => ProgressText is not null && !IsCountable;
 
     public string StreakText => today.Streak == 1 ? "1 día" : $"{today.Streak} días";
 
