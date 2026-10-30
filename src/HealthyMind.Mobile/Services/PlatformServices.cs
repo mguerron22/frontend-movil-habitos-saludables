@@ -1,4 +1,5 @@
 using HealthyMind.Mobile.Core.Habits;
+using HealthyMind.Mobile.Core.Notifications;
 using HealthyMind.Mobile.Core.Connectivity;
 using HealthyMind.Mobile.Core.Settings;
 
@@ -14,6 +15,8 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
     private const string RefreshExpiresKey = "refresh_expires_at";
     private const string LocationEnabledKey = "location_enabled";
     private const string StepCounterStateKey = "step_counter_state";
+    private const string LastNotifiedRecommendationKey = "last_notified_recommendation_at";
+    private const string PresentationModeKey = "presentation_mode";
 
     public string ApiBaseUrl
     {
@@ -70,6 +73,22 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
     {
         get => preferences.Get<string?>(StepCounterStateKey, null);
         set => preferences.Set(StepCounterStateKey, value);
+    }
+
+    public DateTimeOffset? LastNotifiedRecommendationAt
+    {
+        get
+        {
+            var ticks = preferences.Get(LastNotifiedRecommendationKey, 0L);
+            return ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero);
+        }
+        set => preferences.Set(LastNotifiedRecommendationKey, value?.UtcTicks ?? 0L);
+    }
+
+    public bool PresentationMode
+    {
+        get => preferences.Get(PresentationModeKey, false);
+        set => preferences.Set(PresentationModeKey, value);
     }
 
     /// <summary>
@@ -155,4 +174,32 @@ internal sealed class NoStepSensor : IStepSensor
     public Task<bool> EnsurePermissionAsync() => Task.FromResult(false);
 
     public Task<long?> ReadTotalAsync(CancellationToken cancellationToken = default) => Task.FromResult<long?>(null);
+}
+
+/// <summary>En Windows la app no avisa en segundo plano: el requisito de notificaciones es del celular.</summary>
+internal sealed class NoAppNotifications : IAppNotifications
+{
+    public Task<bool> EnsurePermissionAsync() => Task.FromResult(false);
+
+    public void ShowRecommendation(string title, string text)
+    {
+    }
+}
+
+/// <summary>En Windows no hay avisos en segundo plano, así que el modo presentación no programa nada.</summary>
+internal sealed class NoPresentationSchedule : IPresentationSchedule
+{
+    public bool IsPrecise => true;
+
+    public void Start()
+    {
+    }
+
+    public void Stop()
+    {
+    }
+
+    public void OpenPrecisionSettings()
+    {
+    }
 }

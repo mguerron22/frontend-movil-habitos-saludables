@@ -3,6 +3,7 @@ using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Connectivity;
 using HealthyMind.Mobile.Core.Habits;
 using HealthyMind.Mobile.Core.Navigation;
+using HealthyMind.Mobile.Core.Notifications;
 using HealthyMind.Mobile.Core.Settings;
 using HealthyMind.Mobile.Services;
 using HealthyMind.Mobile.Views;
@@ -64,9 +65,13 @@ public static class MauiProgram
 #if ANDROID
         services.AddSingleton<IBiometricAuthenticator, Platforms.Android.AndroidBiometricAuthenticator>();
         services.AddSingleton<IStepSensor, Platforms.Android.AndroidStepSensor>();
+        services.AddSingleton<IAppNotifications, Platforms.Android.AndroidNotifications>();
+        services.AddSingleton<IPresentationSchedule, Platforms.Android.AndroidPresentationSchedule>();
 #elif WINDOWS
         services.AddSingleton<IBiometricAuthenticator, Platforms.Windows.WindowsHelloAuthenticator>();
         services.AddSingleton<IStepSensor, NoStepSensor>();
+        services.AddSingleton<IAppNotifications, NoAppNotifications>();
+        services.AddSingleton<IPresentationSchedule, NoPresentationSchedule>();
 #endif
     }
 

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Habits;
 using HealthyMind.Mobile.Core.Navigation;
+using HealthyMind.Mobile.Core.Notifications;
 using HealthyMind.Mobile.Core.Settings;
 using HealthyMind.Mobile.Core.Sync;
 
@@ -16,6 +17,8 @@ public sealed partial class ProfileViewModel(
     IAppSettings settings,
     ISyncService sync,
     RecordLocation location,
+    PresentationMode presentation,
+    IAppNotifications notifications,
     INavigationService navigation,
     IDialogService dialogs) : ViewModelBase
 {
@@ -45,6 +48,9 @@ public sealed partial class ProfileViewModel(
     [ObservableProperty]
     private bool _isLocationEnabled;
 
+    [ObservableProperty]
+    private bool _isPresentationEnabled;
+
     public async Task LoadAsync()
     {
         _loading = true;
@@ -57,6 +63,7 @@ public sealed partial class ProfileViewModel(
         IsBiometricAvailable = await biometric.IsAvailableAsync();
         IsBiometricEnabled = settings.BiometricEnabled;
         IsLocationEnabled = location.IsEnabled;
+        IsPresentationEnabled = presentation.IsEnabled;
         _loading = false;
     }
 
@@ -98,6 +105,42 @@ public sealed partial class ProfileViewModel(
             await dialogs.AlertAsync(
                 "Sin permiso de ubicación",
                 "Para guardar dónde registras tus hábitos, permite la ubicación a HealthyMindIA en los ajustes del teléfono.");
+        }
+    }
+
+    /// <summary>Modo presentación: la IA escribe cada 3 minutos para mostrar las notificaciones.</summary>
+    async partial void OnIsPresentationEnabledChanged(bool value)
+    {
+        if (_loading || value == presentation.IsEnabled)
+        {
+            return;
+        }
+
+        if (!value)
+        {
+            presentation.Disable();
+            return;
+        }
+
+        if (!await notifications.EnsurePermissionAsync())
+        {
+            _loading = true;
+            IsPresentationEnabled = false;
+            _loading = false;
+            await dialogs.AlertAsync(
+                "Sin permiso de notificaciones",
+                "Permite las notificaciones a HealthyMindIA en los ajustes del teléfono para ver los avisos de la IA.");
+            return;
+        }
+
+        presentation.Enable();
+        if (!presentation.IsPrecise && await dialogs.ConfirmAsync(
+                "Avisos a tiempo",
+                "Para que el aviso llegue justo cada 3 minutos, activa \"Alarmas y recordatorios\" para HealthyMindIA. Sin eso, Android puede atrasarlo.",
+                "Abrir ajustes",
+                "Ahora no"))
+        {
+            presentation.OpenPrecisionSettings();
         }
     }
 

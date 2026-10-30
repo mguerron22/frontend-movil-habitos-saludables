@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Habits;
 using HealthyMind.Mobile.Core.Navigation;
+using HealthyMind.Mobile.Core.Notifications;
 using HealthyMind.Mobile.Core.Sync;
 
 namespace HealthyMind.Mobile.Core.ViewModels;
@@ -26,6 +27,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
     private readonly TimeProvider _timeProvider;
     private readonly StepTracker _steps;
     private readonly RecordLocation _location;
+    private readonly IAppNotifications _notifications;
     private readonly SemaphoreSlim _counterGate = new(1, 1);
 
     [ObservableProperty]
@@ -81,7 +83,8 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         IUiDispatcher ui,
         TimeProvider timeProvider,
         StepTracker steps,
-        RecordLocation location)
+        RecordLocation location,
+        IAppNotifications notifications)
     {
         _session = session;
         _habits = habits;
@@ -92,6 +95,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         _timeProvider = timeProvider;
         _steps = steps;
         _location = location;
+        _notifications = notifications;
         _session.OnlineRestored += OnOnlineRestored;
         _sync.Completed += OnSyncCompleted;
     }
@@ -115,6 +119,9 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         await UpdateStepsAsync();
         await ReloadHabitsAsync();
         _sync.RequestSync();
+
+        // Sin permiso no llegan los avisos de la IA. Android pregunta una sola vez (o dos, si la primera dijo que no).
+        await _notifications.EnsurePermissionAsync();
     }
 
     public void Dispose()

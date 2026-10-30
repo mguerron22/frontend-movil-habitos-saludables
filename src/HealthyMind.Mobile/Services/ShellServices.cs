@@ -17,6 +17,7 @@ public static class Routes
     public const string ChangePassword = "change-password";
     public const string Sessions = "sessions";
     public const string AdminUsers = "admin-users";
+    public const string Insights = "insights";
 
     /// <summary>Parámetro con el id del hábito a editar.</summary>
     public const string HabitIdParameter = "id";
@@ -34,7 +35,12 @@ internal sealed class ShellNavigationService : INavigationService
 
     public Task GoToUnlockAsync() => GoAsync($"//{Routes.Unlock}");
 
-    public Task GoToMainAsync() => GoAsync($"//{Routes.Main}/{Routes.Home}");
+    /// <summary>Entra a la app; si se abrió desde una notificación, sigue a la pantalla que pedía.</summary>
+    public async Task GoToMainAsync()
+    {
+        await GoAsync($"//{Routes.Main}/{Routes.Home}");
+        await NotificationLaunch.OpenPendingAsync();
+    }
 
     public Task GoToHabitsAsync() => GoAsync($"//{Routes.Main}/{Routes.Habits}");
 

@@ -12,4 +12,11 @@ public class MainApplication : MauiApplication
 	}
 
 	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+
+	public override void OnCreate()
+	{
+		base.OnCreate();
+		Platforms.Android.RecommendationCheckJob.Schedule(this);
+		IPlatformApplication.Current?.Services.GetRequiredService<Core.Notifications.PresentationMode>().Restore();
+	}
 }

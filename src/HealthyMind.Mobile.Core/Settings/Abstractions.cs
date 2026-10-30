@@ -25,6 +25,12 @@ public interface IAppSettings
 
     /// <summary>Última lectura del contador de pasos (ver <see cref="Habits.StepDay"/>).</summary>
     string? StepCounterState { get; set; }
+
+    /// <summary>Fecha de la última recomendación de la IA de la que se avisó, para no repetir el aviso.</summary>
+    DateTimeOffset? LastNotifiedRecommendationAt { get; set; }
+
+    /// <summary>Modo presentación encendido: la IA escribe cada pocos minutos (ver <see cref="Notifications.PresentationMode"/>).</summary>
+    bool PresentationMode { get; set; }
 }
 
 /// <summary>Almacenamiento cifrado del refresh token (en MAUI: SecureStorage, respaldado por Android Keystore).</summary>

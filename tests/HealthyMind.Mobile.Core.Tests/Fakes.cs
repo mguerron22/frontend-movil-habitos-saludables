@@ -67,6 +67,10 @@ internal sealed class FakeSettings : IAppSettings
     public bool LocationEnabled { get; set; }
 
     public string? StepCounterState { get; set; }
+
+    public DateTimeOffset? LastNotifiedRecommendationAt { get; set; }
+
+    public bool PresentationMode { get; set; }
 }
 
 internal sealed class FakeTokenStore : ISecureTokenStore

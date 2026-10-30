@@ -1,5 +1,6 @@
 using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Navigation;
+using HealthyMind.Mobile.Core.Notifications;
 
 namespace HealthyMind.Mobile;
 
@@ -7,8 +8,10 @@ public partial class App : Application
 {
     private readonly AppShell _shell;
 
-    public App(AppShell shell, ISessionManager session, INavigationService navigation)
+    /// <param name="recommendations">Se pide aquí para que escuche cada sincronización desde que arranca la app.</param>
+    public App(AppShell shell, ISessionManager session, INavigationService navigation, RecommendationNotifier recommendations)
     {
+        _ = recommendations;
         InitializeComponent();
         _shell = shell;
 

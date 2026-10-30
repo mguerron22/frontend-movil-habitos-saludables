@@ -3,6 +3,7 @@ using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Connectivity;
 using HealthyMind.Mobile.Core.Data;
 using HealthyMind.Mobile.Core.Habits;
+using HealthyMind.Mobile.Core.Notifications;
 using HealthyMind.Mobile.Core.Sync;
 using HealthyMind.Mobile.Core.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,7 @@ public static class DependencyInjection
 
     /// <summary>
     /// Registra la lógica de la app. La plataforma (MAUI) debe registrar antes: IAppSettings, ISecureTokenStore,
-    /// INetworkStatus, IBiometricAuthenticator, INavigationService, IDialogService e IUiDispatcher.
+    /// INetworkStatus, IBiometricAuthenticator, INavigationService, IDialogService, IUiDispatcher e IAppNotifications.
     /// </summary>
     public static IServiceCollection AddHealthyMindCore(this IServiceCollection services, string databasePath)
     {
@@ -50,6 +51,10 @@ public static class DependencyInjection
         services.AddSingleton<IHabitService, HabitService>();
         services.AddSingleton<StepTracker>();
         services.AddSingleton<RecordLocation>();
+        services.AddSingleton<RecommendationNotifier>();
+        services.AddTransient<BackgroundCheck>();
+        services.AddTransient<RecommendationApi>();
+        services.AddSingleton<PresentationMode>();
 
         services.AddTransient<StartupViewModel>();
         services.AddTransient<LoginViewModel>();
