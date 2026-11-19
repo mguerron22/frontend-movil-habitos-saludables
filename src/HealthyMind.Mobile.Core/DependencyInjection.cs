@@ -16,7 +16,7 @@ public static class DependencyInjection
 
     /// <summary>
     /// Registra la lógica de la app. La plataforma (MAUI) debe registrar antes: IAppSettings, ISecureTokenStore,
-    /// INetworkStatus, IBiometricAuthenticator, INavigationService, IDialogService, IUiDispatcher, IAppNotifications, IPushTokenSource e IReminderSchedule.
+    /// INetworkStatus, IBiometricAuthenticator, INavigationService, IDialogService, IUiDispatcher, IAppNotifications, IPushTokenSource, IReminderSchedule e IBatteryOptimization.
     /// </summary>
     public static IServiceCollection AddHealthyMindCore(this IServiceCollection services, string databasePath)
     {
@@ -59,7 +59,8 @@ public static class DependencyInjection
         services.AddSingleton<PushRegistration>();
         services.AddSingleton<RecommendationBadge>();
         services.AddSingleton<PushMessageHandler>();
-        services.AddSingleton<DailyReminder>();
+        services.AddSingleton<RecommendationFeedback>();
+        services.AddSingleton<Reminders>();
 
         services.AddTransient<StartupViewModel>();
         services.AddTransient<LoginViewModel>();

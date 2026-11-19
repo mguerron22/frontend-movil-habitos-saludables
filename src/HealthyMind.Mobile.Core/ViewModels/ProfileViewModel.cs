@@ -24,7 +24,8 @@ public sealed partial class ProfileViewModel(
     IDialogService dialogs,
     IConnectivityService connectivity,
     IUiDispatcher ui,
-    DailyReminder reminder) : ViewModelBase
+    Reminders reminder,
+    PushRegistration push) : ViewModelBase
 {
     private bool _loading;
     private bool _watching;
@@ -69,7 +70,32 @@ public sealed partial class ProfileViewModel(
 
     /// <summary>Hora del recordatorio (TimeSpan porque es lo que usa el TimePicker).</summary>
     [ObservableProperty]
-    private TimeSpan _reminderTime = DailyReminder.DefaultTime.ToTimeSpan();
+    private TimeSpan _reminderTime = Reminders.DefaultDailyTime.ToTimeSpan();
+
+    /// <summary>Aviso a las 21:00 si una racha se pierde hoy (local, sin conexión).</summary>
+    [ObservableProperty]
+    private bool _isStreakEnabled;
+
+    /// <summary>Avisos push de la IA en este teléfono (se le informa al servidor).</summary>
+    [ObservableProperty]
+    private bool _isAiPushEnabled;
+
+    partial void OnIsStreakEnabledChanged(bool value)
+    {
+        if (!_loading && value != reminder.IsStreakEnabled)
+        {
+            reminder.SetStreakEnabled(value);
+        }
+    }
+
+    partial void OnIsAiPushEnabledChanged(bool value)
+    {
+        if (!_loading && value != settings.AiPushEnabled)
+        {
+            // Sin conexión se guarda igual; se le avisa al servidor en la próxima sincronización.
+            _ = push.SetAiNotificationsAsync(value);
+        }
+    }
 
     public async Task LoadAsync()
     {
@@ -91,8 +117,10 @@ public sealed partial class ProfileViewModel(
         IsBiometricEnabled = settings.BiometricEnabled;
         IsLocationEnabled = location.IsEnabled;
         IsPresentationEnabled = presentation.IsEnabled;
-        IsReminderEnabled = reminder.IsEnabled;
-        ReminderTime = reminder.Time.ToTimeSpan();
+        IsReminderEnabled = reminder.IsDailyEnabled;
+        IsStreakEnabled = reminder.IsStreakEnabled;
+        IsAiPushEnabled = settings.AiPushEnabled;
+        ReminderTime = reminder.DailyTime.ToTimeSpan();
         _loading = false;
     }
 
@@ -175,14 +203,14 @@ public sealed partial class ProfileViewModel(
 
     async partial void OnIsReminderEnabledChanged(bool value)
     {
-        if (_loading || value == reminder.IsEnabled)
+        if (_loading || value == reminder.IsDailyEnabled)
         {
             return;
         }
 
         if (!value)
         {
-            reminder.Disable();
+            reminder.DisableDaily();
             return;
         }
 
@@ -197,14 +225,14 @@ public sealed partial class ProfileViewModel(
             return;
         }
 
-        reminder.Enable(TimeOnly.FromTimeSpan(ReminderTime));
+        reminder.EnableDaily(TimeOnly.FromTimeSpan(ReminderTime));
     }
 
     partial void OnReminderTimeChanged(TimeSpan value)
     {
-        if (!_loading && reminder.IsEnabled)
+        if (!_loading && reminder.IsDailyEnabled)
         {
-            reminder.Enable(TimeOnly.FromTimeSpan(value));
+            reminder.EnableDaily(TimeOnly.FromTimeSpan(value));
         }
     }
 
@@ -279,7 +307,11 @@ public sealed partial class ProfileViewModel(
             "Borrar",
             "Cancelar");
 
-        if (confirmed && await RunAsync(() => session.ClearDeviceDataAsync()))
+        if (confirmed && await RunAsync(async () =>
+            {
+                await push.UnregisterAsync(); // Que el servidor deje de avisar a este teléfono.
+                await session.ClearDeviceDataAsync();
+            }))
         {
             await navigation.GoToLoginAsync();
         }

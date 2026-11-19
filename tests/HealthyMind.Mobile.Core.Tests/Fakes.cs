@@ -81,6 +81,14 @@ internal sealed class FakeSettings : IAppSettings
     public bool ReminderEnabled { get; set; }
 
     public TimeOnly? ReminderTime { get; set; }
+
+    public bool StreakAlertEnabled { get; set; } = true;
+
+    public bool AiPushEnabled { get; set; } = true;
+
+    public DateTimeOffset? SeenSyncPending { get; set; }
+
+    public bool BatteryPromptShown { get; set; }
 }
 
 internal sealed class FakeTokenStore : ISecureTokenStore

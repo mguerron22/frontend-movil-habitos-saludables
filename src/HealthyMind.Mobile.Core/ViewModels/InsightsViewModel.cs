@@ -26,6 +26,11 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
     private readonly IUiDispatcher _ui;
     private readonly TimeProvider _timeProvider;
     private readonly Notifications.RecommendationBadge _badge;
+    private readonly Notifications.RecommendationFeedback _feedback;
+    private Guid? _currentId;
+
+    [ObservableProperty]
+    private bool? _wasHelpful;
 
     [ObservableProperty]
     private string _initials = string.Empty;
@@ -73,9 +78,11 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
         ISyncService sync,
         IUiDispatcher ui,
         TimeProvider timeProvider,
-        Notifications.RecommendationBadge badge)
+        Notifications.RecommendationBadge badge,
+        Notifications.RecommendationFeedback feedback)
     {
         _badge = badge;
+        _feedback = feedback;
         _recommendations = recommendations;
         _habits = habits;
         _session = session;
@@ -87,6 +94,15 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
 
     public bool HasFocusHabit => !string.IsNullOrWhiteSpace(FocusHabit);
 
+    public bool IsRated => WasHelpful is not null;
+
+    public string FeedbackText => WasHelpful switch
+    {
+        true => "¡Gracias! La IA seguirá por este camino.",
+        false => "Gracias: la próxima recomendación probará otro enfoque.",
+        null => "¿Te sirvió esta recomendación?",
+    };
+
     /// <summary>Acciones de la recomendación, una por línea (la IA las manda con "• ").</summary>
     public ObservableCollection<string> Actions { get; } = [];
 
@@ -97,9 +113,30 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
     public async Task LoadAsync()
     {
         Initials = _session.CurrentUser?.Initials ?? string.Empty;
-        _badge.MarkSeen(); // Abrir la pestaña IA apaga el punto de la campana.
+        _badge.MarkSeen(); // Abrir la pestaña IA apaga el punto de la campana (también en sus otros teléfonos).
+        _ = _feedback.SendPendingAsync();
         await ReloadAsync();
         _sync.RequestSync();
+    }
+
+    /// <summary>"Me sirvió" (true) / "No me sirvió" (false). Sin conexión se guarda y se envía después.</summary>
+    [RelayCommand]
+    private async Task RateAsync(string helpful)
+    {
+        if (_currentId is not { } id)
+        {
+            return;
+        }
+
+        var value = bool.Parse(helpful);
+        WasHelpful = value;
+        await _feedback.RateAsync(id, value);
+    }
+
+    partial void OnWasHelpfulChanged(bool? value)
+    {
+        OnPropertyChanged(nameof(IsRated));
+        OnPropertyChanged(nameof(FeedbackText));
     }
 
     public void Dispose() => _sync.Completed -= OnSyncCompleted;
@@ -133,8 +170,10 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
             Title = latest.Title;
             Summary = latest.Summary;
             FocusHabit = latest.FocusHabit;
-            ModelName = latest.ModelName;
+            ModelName = latest.IsRuleBased ? "reglas de HealthyMind (la IA no estaba disponible)" : latest.ModelName;
             GeneratedText = Generated(latest.CreatedAt);
+            _currentId = latest.Id;
+            WasHelpful = latest.WasHelpful;
             foreach (var action in SplitActions(latest.Recommendation))
             {
                 Actions.Add(action);

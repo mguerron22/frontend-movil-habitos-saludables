@@ -96,7 +96,8 @@ public sealed record SyncPullResponse(
     bool IsFullSnapshot,
     IReadOnlyList<HabitSyncItem> Habits,
     IReadOnlyList<HabitRecordSyncItem> Records,
-    IReadOnlyList<RecommendationResponse>? Recommendations = null);
+    IReadOnlyList<RecommendationResponse>? Recommendations = null,
+    DateTimeOffset? RecommendationsSeenAt = null);
 
 /// <summary>Recomendación que el backend genera solo con IA a partir del historial (RF05).</summary>
 public sealed record RecommendationResponse(
@@ -108,7 +109,8 @@ public sealed record RecommendationResponse(
     string ModelName,
     DateOnly PeriodStart,
     DateOnly PeriodEnd,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    bool? WasHelpful = null);
 
 public sealed record HabitSyncItem(HabitResponse Habit, bool IsDeleted);
 

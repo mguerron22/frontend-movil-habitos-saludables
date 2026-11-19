@@ -14,7 +14,15 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
     private readonly IHabitService _habits;
     private readonly INavigationService _navigation;
     private readonly IDialogService _dialogs;
+    private readonly Notifications.Reminders _reminders;
     private Guid? _habitId;
+
+    /// <summary>Recordatorio de este hábito (solo en este teléfono, funciona sin conexión).</summary>
+    [ObservableProperty]
+    private bool _hasReminder;
+
+    [ObservableProperty]
+    private TimeSpan _reminderTime = new(8, 0, 0);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Title), nameof(SaveText))]
@@ -45,8 +53,13 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
     [ObservableProperty]
     private string? _unitError;
 
-    public HabitEditorViewModel(IHabitService habits, INavigationService navigation, IDialogService dialogs)
+    public HabitEditorViewModel(
+        IHabitService habits,
+        INavigationService navigation,
+        IDialogService dialogs,
+        Notifications.Reminders reminders)
     {
+        _reminders = reminders;
         _habits = habits;
         _navigation = navigation;
         _dialogs = dialogs;
@@ -102,6 +115,12 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
         Unit = habit.Unit;
         UsesStepCounter = habit.TrackingMode == TrackingMode.StepCounter;
         IsActive = habit.IsActive;
+
+        if (await _reminders.GetHabitTimeAsync(habit.Id) is { } reminderAt)
+        {
+            HasReminder = true;
+            ReminderTime = reminderAt.ToTimeSpan();
+        }
 
         foreach (var option in Categories)
         {
@@ -178,7 +197,11 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
             Days.Where(day => day.IsSelected).Select(day => day.Day).ToList(),
             UsesStepCounter && CanCountSteps ? TrackingMode.StepCounter : TrackingMode.Manual);
 
-        if (await RunAsync(() => _habits.SaveAsync(draft)))
+        if (await RunAsync(async () =>
+            {
+                var saved = await _habits.SaveAsync(draft);
+                await _reminders.SetHabitTimeAsync(saved.Id, HasReminder ? TimeOnly.FromTimeSpan(ReminderTime) : null);
+            }))
         {
             await _navigation.GoBackAsync();
         }
@@ -212,7 +235,11 @@ public sealed partial class HabitEditorViewModel : ViewModelBase
             "Eliminar",
             "Cancelar");
 
-        if (confirmed && await RunAsync(() => _habits.DeleteAsync(id)))
+        if (confirmed && await RunAsync(async () =>
+            {
+                await _habits.DeleteAsync(id);
+                await _reminders.SetHabitTimeAsync(id, null);
+            }))
         {
             await _navigation.GoBackAsync();
         }

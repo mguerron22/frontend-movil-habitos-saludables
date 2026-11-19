@@ -8,6 +8,16 @@ public sealed class RecommendationApi(AuthenticatedApiClient api)
 {
     public Task RequestNowAsync(CancellationToken cancellationToken = default) =>
         api.SendAsync(HttpMethod.Post, "api/recommendations/now", cancellationToken: cancellationToken);
+
+    public Task RateAsync(Guid recommendationId, bool helpful, CancellationToken cancellationToken = default) =>
+        api.SendAsync(HttpMethod.Put, $"api/recommendations/{recommendationId}/feedback", new FeedbackRequest(helpful), cancellationToken);
+
+    public Task MarkSeenAsync(DateTimeOffset seenAt, CancellationToken cancellationToken = default) =>
+        api.SendAsync(HttpMethod.Put, "api/recommendations/seen", new SeenRequest(seenAt), cancellationToken);
+
+    private sealed record FeedbackRequest(bool Helpful);
+
+    private sealed record SeenRequest(DateTimeOffset SeenAt);
 }
 
 /// <summary>El despertador del sistema que hace correr una revisión cada pocos minutos, aun con la app cerrada.</summary>

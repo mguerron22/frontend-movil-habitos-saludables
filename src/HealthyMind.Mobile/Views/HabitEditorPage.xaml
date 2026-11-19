@@ -121,6 +121,21 @@
                         </FlexLayout>
                     </VerticalStackLayout>
 
+                    <!-- Recordatorio del hábito: aviso local con "Marcar hecho" y "En 1 hora". -->
+                    <VerticalStackLayout Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                                <Label Text="Recordármelo" FontFamily="OpenSansSemibold" />
+                                <Label Text="Solo los días elegidos y si aún no lo cumpliste." Style="{StaticResource Caption}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <Switch Grid.Column="1" IsToggled="{Binding HasReminder}" VerticalOptions="Center" />
+                        </Grid>
+                        <HorizontalStackLayout Spacing="10" IsVisible="{Binding HasReminder}">
+                            <Label Text="Hora:" Style="{StaticResource Caption}" VerticalOptions="Center" />
+                            <TimePicker Time="{Binding ReminderTime}" Format="HH:mm" TextColor="{StaticResource Primary}" FontFamily="OpenSansSemibold" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+
                     <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
                         <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
                     </Border>

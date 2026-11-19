@@ -46,6 +46,18 @@ public interface IAppSettings
 
     /// <summary>Hora local del recordatorio; null = la de por defecto (20:00).</summary>
     TimeOnly? ReminderTime { get; set; }
+
+    /// <summary>Aviso a las 21:00 si una racha se pierde hoy. Encendido por defecto.</summary>
+    bool StreakAlertEnabled { get; set; }
+
+    /// <summary>Avisos push de la IA en este teléfono (se le informa al servidor). Encendido por defecto.</summary>
+    bool AiPushEnabled { get; set; }
+
+    /// <summary>"Visto" de la pestaña IA que falta avisar al servidor (se envía al volver la conexión).</summary>
+    DateTimeOffset? SeenSyncPending { get; set; }
+
+    /// <summary>Ya se explicó cómo quitar la restricción de batería: no se insiste.</summary>
+    bool BatteryPromptShown { get; set; }
 }
 
 /// <summary>Almacenamiento cifrado del refresh token (en MAUI: SecureStorage, respaldado por Android Keystore).</summary>

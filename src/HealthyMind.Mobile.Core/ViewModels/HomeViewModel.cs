@@ -28,6 +28,8 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
     private readonly StepTracker _steps;
     private readonly RecordLocation _location;
     private readonly IAppNotifications _notifications;
+    private readonly IBatteryOptimization _battery;
+    private readonly Settings.IAppSettings _settings;
     private readonly SemaphoreSlim _counterGate = new(1, 1);
 
     [ObservableProperty]
@@ -84,8 +86,12 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         TimeProvider timeProvider,
         StepTracker steps,
         RecordLocation location,
-        IAppNotifications notifications)
+        IAppNotifications notifications,
+        IBatteryOptimization battery,
+        Settings.IAppSettings settings)
     {
+        _battery = battery;
+        _settings = settings;
         _session = session;
         _habits = habits;
         _sync = sync;
@@ -121,7 +127,33 @@ public sealed partial class HomeViewModel : ViewModelBase, IDisposable
         _sync.RequestSync();
 
         // Sin permiso no llegan los avisos de la IA. Android pregunta una sola vez (o dos, si la primera dijo que no).
-        await _notifications.EnsurePermissionAsync();
+        if (await _notifications.EnsurePermissionAsync())
+        {
+            await OfferBatteryExemptionAsync();
+        }
+    }
+
+    /// <summary>
+    /// Marcas como TECNO o Xiaomi cortan las apps cerradas para ahorrar batería y los avisos no llegan.
+    /// Se explica una sola vez y se abre el diálogo del sistema; si dice que no, no se insiste.
+    /// </summary>
+    private async Task OfferBatteryExemptionAsync()
+    {
+        if (_settings.BatteryPromptShown || !_battery.IsRestricted)
+        {
+            return;
+        }
+
+        _settings.BatteryPromptShown = true;
+        if (await _dialogs.ConfirmAsync(
+                "Para que los avisos lleguen a tiempo",
+                "Tu teléfono puede detener HealthyMindIA para ahorrar batería y entonces no llegan los recordatorios ni las "
+                + "recomendaciones. ¿Permitir que funcione sin restricciones? Gasta muy poca batería.",
+                "Permitir",
+                "Ahora no"))
+        {
+            _battery.RequestUnrestricted();
+        }
     }
 
     public void Dispose()

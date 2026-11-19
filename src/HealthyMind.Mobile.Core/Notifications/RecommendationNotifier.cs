@@ -15,8 +15,17 @@ public interface IAppNotifications
     /// <summary>Aviso de recomendación nueva; al tocarlo se abre la pestaña IA.</summary>
     void ShowRecommendation(string title, string text);
 
-    /// <summary>Recordatorio diario de hábitos pendientes; al tocarlo se abre la app.</summary>
-    void ShowReminder(string title, string text);
+    /// <summary>
+    /// Recordatorio local (diario, racha o de un hábito). Trae el botón "En 1 hora" y, si es de un hábito,
+    /// también "Marcar hecho". Al tocarlo se abre la app.
+    /// </summary>
+    void ShowReminder(string reminderId, string title, string text, Guid? habitId = null);
+
+    /// <summary>Anuncio del administrador (p. ej. mantenimiento).</summary>
+    void ShowAnnouncement(string title, string text);
+
+    /// <summary>Quita un aviso ya mostrado (tras "Marcar hecho" o "En 1 hora").</summary>
+    void Dismiss(string reminderId);
 }
 
 /// <summary>

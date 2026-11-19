@@ -140,6 +140,34 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
         set => preferences.Set("reminder_minutes", value is { } time ? (int)time.ToTimeSpan().TotalMinutes : -1);
     }
 
+    public bool StreakAlertEnabled
+    {
+        get => preferences.Get("streak_alert_enabled", true);
+        set => preferences.Set("streak_alert_enabled", value);
+    }
+
+    public bool AiPushEnabled
+    {
+        get => preferences.Get("ai_push_enabled", true);
+        set => preferences.Set("ai_push_enabled", value);
+    }
+
+    public DateTimeOffset? SeenSyncPending
+    {
+        get
+        {
+            var ticks = preferences.Get("seen_sync_pending", 0L);
+            return ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero);
+        }
+        set => preferences.Set("seen_sync_pending", value?.UtcTicks ?? 0L);
+    }
+
+    public bool BatteryPromptShown
+    {
+        get => preferences.Get("battery_prompt_shown", false);
+        set => preferences.Set("battery_prompt_shown", value);
+    }
+
     /// <summary>
     /// Release: el servidor de producción (HTTPS, detrás del IIS).
     /// Debug: el emulador de Android llega a la PC por 10.0.2.2; Windows, por localhost.
@@ -241,7 +269,25 @@ internal sealed class NoAppNotifications : IAppNotifications
     {
     }
 
-    public void ShowReminder(string title, string text)
+    public void ShowReminder(string reminderId, string title, string text, Guid? habitId = null)
+    {
+    }
+
+    public void ShowAnnouncement(string title, string text)
+    {
+    }
+
+    public void Dismiss(string reminderId)
+    {
+    }
+}
+
+/// <summary>En Windows no hay restricciones de batería que explicar.</summary>
+internal sealed class NoBatteryOptimization : IBatteryOptimization
+{
+    public bool IsRestricted => false;
+
+    public void RequestUnrestricted()
     {
     }
 }
@@ -250,16 +296,22 @@ internal sealed class NoAppNotifications : IAppNotifications
 internal sealed class NoPushTokenSource : IPushTokenSource
 {
     public Task<string?> GetTokenAsync() => Task.FromResult<string?>(null);
+
+    public Task SubscribeAsync(string topic) => Task.CompletedTask;
 }
 
 /// <summary>En Windows no hay recordatorios en segundo plano.</summary>
 internal sealed class NoReminderSchedule : IReminderSchedule
 {
-    public void Schedule(TimeOnly at)
+    public void ScheduleDaily(string id, TimeOnly at)
     {
     }
 
-    public void Cancel()
+    public void ScheduleOnce(string id, TimeSpan delay)
+    {
+    }
+
+    public void Cancel(string id)
     {
     }
 }

@@ -277,6 +277,12 @@ public sealed class SyncService : ISyncService, IDisposable
         // Las recomendaciones solo se generan en el servidor: aquí se guardan para leerlas sin conexión.
         await _recommendations.SaveAsync((response.Recommendations ?? []).Select(RecommendationRow.From));
 
+        // Si las vio en otro teléfono, aquí también se apaga la campana (la marca solo avanza).
+        if (response.RecommendationsSeenAt is { } seenAt && seenAt > _settings.LastSeenRecommendationAt.GetValueOrDefault())
+        {
+            _settings.LastSeenRecommendationAt = seenAt;
+        }
+
         await _outbox.SetPullCursorAsync(response.ServerTime);
     }
 
