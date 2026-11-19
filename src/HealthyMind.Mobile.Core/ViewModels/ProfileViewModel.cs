@@ -159,16 +159,15 @@ public sealed partial class ProfileViewModel(
     [RelayCommand]
     private async Task LogoutAsync()
     {
-        // Los cambios hechos sin conexión viven solo en el teléfono: avisar antes de que se pierdan.
-        await sync.SyncAsync();
-        var pending = await sync.PendingCountAsync();
+        // Los datos se quedan en el teléfono; solo se pierde lo pendiente si después entra otra persona.
+        var pending = await PendingAfterSyncAsync();
         var warning = pending == 0
             ? string.Empty
-            : $"\n\nOjo: tienes {pending} cambio(s) sin sincronizar que se perderán. Conéctate a internet antes de salir para guardarlos.";
+            : $"\n\nTienes {pending} cambio(s) sin sincronizar: se enviarán cuando vuelvas a entrar. Si entra otra persona en este teléfono, se perderán.";
 
         var confirmed = await dialogs.ConfirmAsync(
             "Cerrar sesión",
-            "Se borrarán los datos guardados en este teléfono y tendrás que ingresar tu contraseña otra vez." + warning,
+            "Tendrás que ingresar tu contraseña para volver a entrar. Tus datos se quedan en este teléfono." + warning,
             "Cerrar sesión",
             "Cancelar");
 
@@ -176,5 +175,33 @@ public sealed partial class ProfileViewModel(
         {
             await navigation.GoToLoginAsync();
         }
+    }
+
+    /// <summary>Para prestar o vender el teléfono: cierra la sesión y borra todo lo guardado.</summary>
+    [RelayCommand]
+    private async Task ClearDeviceDataAsync()
+    {
+        var pending = await PendingAfterSyncAsync();
+        var warning = pending == 0
+            ? string.Empty
+            : $"\n\nOjo: tienes {pending} cambio(s) sin sincronizar que se perderán. Conéctate a internet antes para guardarlos.";
+
+        var confirmed = await dialogs.ConfirmAsync(
+            "Borrar datos de este teléfono",
+            "Se cerrará la sesión y se borrarán tus hábitos, registros y preferencias guardados aquí. "
+            + "Tu cuenta y lo ya sincronizado siguen en el servidor." + warning,
+            "Borrar",
+            "Cancelar");
+
+        if (confirmed && await RunAsync(() => session.ClearDeviceDataAsync()))
+        {
+            await navigation.GoToLoginAsync();
+        }
+    }
+
+    private async Task<int> PendingAfterSyncAsync()
+    {
+        await sync.SyncAsync();
+        return await sync.PendingCountAsync();
     }
 }

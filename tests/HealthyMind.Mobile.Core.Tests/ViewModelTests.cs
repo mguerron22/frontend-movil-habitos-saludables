@@ -67,6 +67,14 @@ public sealed class ViewModelTests
     }
 
     [Fact]
+    public void Login_starts_with_the_last_user_of_this_phone()
+    {
+        var vm = new LoginViewModel(null!, null!, new FakeSettings { LastUsername = "ana.perez" }, new FakeConnectivity(), null!, null!);
+
+        Assert.Equal("ana.perez", vm.UsernameOrEmail);
+    }
+
+    [Fact]
     public async Task Biometrics_are_offered_only_once_and_only_if_available()
     {
         var settings = new FakeSettings();

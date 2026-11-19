@@ -17,6 +17,9 @@ public interface IAppSettings
     /// <summary>Ya se le preguntó si quiere usar huella (para no insistir en cada login).</summary>
     bool BiometricOffered { get; set; }
 
+    /// <summary>Usuario o correo del último ingreso: el login aparece ya lleno y solo falta la contraseña.</summary>
+    string? LastUsername { get; set; }
+
     /// <summary>Hasta cuándo sirve el refresh token guardado, para no intentar reanudar una sesión vencida.</summary>
     DateTimeOffset? RefreshTokenExpiresAt { get; set; }
 

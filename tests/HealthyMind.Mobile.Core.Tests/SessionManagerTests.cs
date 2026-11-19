@@ -128,17 +128,53 @@ public sealed class SessionManagerTests : IDisposable
     }
 
     [Fact]
-    public async Task Logout_clears_tokens_biometrics_and_local_data()
+    public async Task Logout_revokes_the_session_but_keeps_local_data_and_biometrics()
+    {
+        _server.On("/api/auth/login", HttpStatusCode.OK, Samples.Auth("access-1", "refresh-1"));
+        _server.On("/api/auth/logout", HttpStatusCode.NoContent);
+        await _session.LoginAsync("ana", "Clave1234");
+        _settings.BiometricEnabled = true;
+        _settings.BiometricOffered = true;
+
+        await _session.LogoutAsync();
+
+        Assert.Null(_tokens.RefreshToken);
+        Assert.False(await _session.HasStoredSessionAsync());
+        Assert.Equal(1, _server.Calls("/api/auth/logout"));
+        Assert.True(_settings.BiometricEnabled);
+        Assert.True(_settings.BiometricOffered);
+        Assert.Equal("ana", _settings.LastUsername);
+        Assert.NotNull(await new UserCache(_database, _clock).GetAsync());
+    }
+
+    [Fact]
+    public async Task Same_user_logging_in_again_after_logout_keeps_biometrics()
+    {
+        _server.On("/api/auth/login", HttpStatusCode.OK, Samples.Auth("access-1", "refresh-1"));
+        _server.On("/api/auth/logout", HttpStatusCode.NoContent);
+        await _session.LoginAsync("ana", "Clave1234");
+        _settings.BiometricEnabled = true;
+        await _session.LogoutAsync();
+
+        await _session.LoginAsync("ana", "Clave1234");
+
+        Assert.True(_settings.BiometricEnabled);
+        Assert.Equal("Ana", _session.CurrentUser?.FirstName);
+    }
+
+    [Fact]
+    public async Task Clear_device_data_wipes_everything()
     {
         _server.On("/api/auth/login", HttpStatusCode.OK, Samples.Auth("access-1", "refresh-1"));
         _server.On("/api/auth/logout", HttpStatusCode.NoContent);
         await _session.LoginAsync("ana", "Clave1234");
         _settings.BiometricEnabled = true;
 
-        await _session.LogoutAsync();
+        await _session.ClearDeviceDataAsync();
 
         Assert.Null(_tokens.RefreshToken);
         Assert.False(_settings.BiometricEnabled);
+        Assert.Null(_settings.LastUsername);
         Assert.Null(await new UserCache(_database, _clock).GetAsync());
         Assert.Equal(1, _server.Calls("/api/auth/logout"));
     }
@@ -154,6 +190,7 @@ public sealed class SessionManagerTests : IDisposable
         await _session.LoginAsync("otro", "Clave1234");
 
         Assert.False(_settings.BiometricEnabled);
+        Assert.Equal("otro", _settings.LastUsername);
     }
 
     public void Dispose()

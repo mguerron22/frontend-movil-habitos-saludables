@@ -15,8 +15,9 @@ public sealed partial class LoginViewModel(
     INavigationService navigation,
     IDialogService dialogs) : ViewModelBase
 {
+    /// <summary>Viene lleno con el último usuario que entró en este teléfono.</summary>
     [ObservableProperty]
-    private string _usernameOrEmail = string.Empty;
+    private string _usernameOrEmail = settings.LastUsername ?? string.Empty;
 
     [ObservableProperty]
     private string _password = string.Empty;

@@ -12,6 +12,7 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
     private const string DeviceIdKey = "device_id";
     private const string BiometricEnabledKey = "biometric_enabled";
     private const string BiometricOfferedKey = "biometric_offered";
+    private const string LastUsernameKey = "last_username";
     private const string RefreshExpiresKey = "refresh_expires_at";
     private const string LocationEnabledKey = "location_enabled";
     private const string StepCounterStateKey = "step_counter_state";
@@ -51,6 +52,22 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
     {
         get => preferences.Get(BiometricOfferedKey, false);
         set => preferences.Set(BiometricOfferedKey, value);
+    }
+
+    public string? LastUsername
+    {
+        get => preferences.Get<string?>(LastUsernameKey, null);
+        set
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                preferences.Remove(LastUsernameKey);
+            }
+            else
+            {
+                preferences.Set(LastUsernameKey, value);
+            }
+        }
     }
 
     public DateTimeOffset? RefreshTokenExpiresAt

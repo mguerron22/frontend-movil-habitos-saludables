@@ -114,7 +114,9 @@
                         <Button
                             AutomationId="LoginButton"
                             Style="{StaticResource PrimaryButton}"
-                            Text="Iniciar Sesión  →"
+                            Text="Iniciar Sesión"
+                            ImageSource="ic_arrow_right.png"
+                            ContentLayout="Right,8"
                             Command="{Binding LoginCommand}"
                             IsEnabled="{Binding IsNotBusy}" />
                         <ActivityIndicator

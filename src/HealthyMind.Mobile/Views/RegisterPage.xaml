@@ -66,7 +66,7 @@
                     <controls:FormField
                         Label="Contraseña"
                         Icon="ic_key.png"
-                        Placeholder="Mínimo 8, con mayúscula y número"
+                        Placeholder="Mínimo 8: mayúscula, minúscula y número"
                         IsPassword="{Binding IsPasswordHidden}"
                         Text="{Binding Password}"
                         Error="{Binding PasswordError}" />
@@ -103,7 +103,9 @@
                     <Grid>
                         <Button
                             Style="{StaticResource PrimaryButton}"
-                            Text="Crear cuenta  →"
+                            Text="Crear cuenta"
+                            ImageSource="ic_arrow_right.png"
+                            ContentLayout="Right,8"
                             Command="{Binding RegisterCommand}"
                             IsEnabled="{Binding IsNotBusy}" />
                         <ActivityIndicator

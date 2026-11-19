@@ -149,6 +149,14 @@
                     ContentLayout="Left,8"
                     Command="{Binding LogoutCommand}"
                     IsEnabled="{Binding IsNotBusy}" />
+
+                <Button
+                    Text="Borrar datos de este teléfono"
+                    BackgroundColor="Transparent"
+                    TextColor="{StaticResource Danger}"
+                    FontSize="13"
+                    Command="{Binding ClearDeviceDataCommand}"
+                    IsEnabled="{Binding IsNotBusy}" />
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

@@ -62,6 +62,8 @@ internal sealed class FakeSettings : IAppSettings
 
     public bool BiometricOffered { get; set; }
 
+    public string? LastUsername { get; set; }
+
     public DateTimeOffset? RefreshTokenExpiresAt { get; set; }
 
     public bool LocationEnabled { get; set; }

@@ -204,6 +204,8 @@ public sealed class SyncServiceTests : LocalDataTest
 
         public Task LogoutAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
+        public Task ClearDeviceDataAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
         public Task<string> GetAccessTokenAsync(CancellationToken cancellationToken) => Task.FromResult("token");
 
         public Task<string> RenewAfterRejectionAsync(string rejectedToken, CancellationToken cancellationToken) => Task.FromResult("token");

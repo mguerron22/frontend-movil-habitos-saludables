@@ -41,8 +41,14 @@ public interface ISessionManager : IAccessTokenSource
     /// <summary>Retoma la sesión guardada: es lo que se hace después de la huella.</summary>
     Task<ResumeOutcome> ResumeAsync(CancellationToken cancellationToken = default);
 
-    /// <summary>Cierra la sesión y borra los datos locales del usuario.</summary>
+    /// <summary>
+    /// Cierra la sesión (el servidor anula el token) pero conserva los datos locales: si vuelve a entrar el
+    /// mismo usuario los recupera, con lo pendiente de sincronizar; si entra otro, se borran al iniciar sesión.
+    /// </summary>
     Task LogoutAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Cierra la sesión y además borra todo lo guardado en el teléfono (para prestarlo o venderlo).</summary>
+    Task ClearDeviceDataAsync(CancellationToken cancellationToken = default);
 
     /// <summary>El servidor devolvió el perfil cambiado: se usa desde ya y se guarda para entrar sin conexión.</summary>
     Task UpdateCurrentUserAsync(UserProfile user);
@@ -146,6 +152,7 @@ public sealed class SessionManager : ISessionManager, IDisposable
             new LoginRequest(usernameOrEmail.Trim(), password, settings.DeviceId, settings.DeviceName),
             cancellationToken);
         await StartSessionAsync(response);
+        settings.LastUsername = usernameOrEmail.Trim();
     }
 
     public async Task RegisterAsync(NewAccount account, CancellationToken cancellationToken = default)
@@ -162,6 +169,7 @@ public sealed class SessionManager : ISessionManager, IDisposable
                 LocalTimeZone.IanaId()),
             cancellationToken);
         await StartSessionAsync(response);
+        settings.LastUsername = account.Username.Trim();
     }
 
     public async Task<ResumeOutcome> ResumeAsync(CancellationToken cancellationToken = default)
@@ -222,9 +230,17 @@ public sealed class SessionManager : ISessionManager, IDisposable
             }
         }
 
+        // Se conservan los datos locales, el perfil guardado y la preferencia de huella: StartSessionAsync
+        // los borra si el próximo ingreso es de otra persona.
         ForgetTokens();
+    }
+
+    public async Task ClearDeviceDataAsync(CancellationToken cancellationToken = default)
+    {
+        await LogoutAsync(cancellationToken);
         settings.BiometricEnabled = false;
         settings.BiometricOffered = false;
+        settings.LastUsername = null;
         await database.ClearAllAsync();
     }
 
@@ -321,6 +337,7 @@ public sealed class SessionManager : ISessionManager, IDisposable
             await database.ClearAllAsync();
             settings.BiometricEnabled = false;
             settings.BiometricOffered = false;
+            settings.LastUsername = null;
         }
 
         await ApplyAsync(response);
