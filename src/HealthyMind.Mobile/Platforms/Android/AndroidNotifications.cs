@@ -55,6 +55,45 @@ internal sealed class AndroidNotifications : IAppNotifications
         NotificationManagerCompat.From(Context)?.Notify(RecommendationNotificationId, notification.Build());
     }
 
+    public void ShowReminder(string title, string text)
+    {
+        EnsureReminderChannel();
+
+        var notification = new NotificationCompat.Builder(Context, ReminderChannelId);
+        notification.SetSmallIcon(Resource.Drawable.ic_notification);
+        notification.SetContentTitle(title);
+        notification.SetContentText(text);
+        notification.SetStyle(new NotificationCompat.BigTextStyle().BigText(text));
+        notification.SetContentIntent(OpenAppIntent());
+        notification.SetAutoCancel(true);
+        notification.SetVisibility(NotificationCompat.VisibilityPrivate);
+
+        NotificationManagerCompat.From(Context)?.Notify(ReminderNotificationId, notification.Build());
+    }
+
+    private const string ReminderChannelId = "reminders";
+    private const int ReminderNotificationId = 2;
+
+    private static void EnsureReminderChannel()
+    {
+        if (!OperatingSystem.IsAndroidVersionAtLeast(26))
+        {
+            return;
+        }
+
+        var channel = new NotificationChannel(ReminderChannelId, "Recordatorios de hábitos", NotificationImportance.Default)
+        {
+            Description = "Un aviso al día si te falta algún hábito.",
+        };
+        ((NotificationManager)Context.GetSystemService(Context.NotificationService)!).CreateNotificationChannel(channel);
+    }
+
+    private static PendingIntent OpenAppIntent()
+    {
+        var intent = new Intent(Context, typeof(MainActivity)).SetFlags(ActivityFlags.SingleTop | ActivityFlags.ClearTop);
+        return PendingIntent.GetActivity(Context, 1, intent, PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent)!;
+    }
+
     private static void EnsureChannel()
     {
         if (!OperatingSystem.IsAndroidVersionAtLeast(26))

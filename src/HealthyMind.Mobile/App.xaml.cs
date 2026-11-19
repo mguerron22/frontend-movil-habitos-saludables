@@ -8,10 +8,19 @@ public partial class App : Application
 {
     private readonly AppShell _shell;
 
-    /// <param name="recommendations">Se pide aquí para que escuche cada sincronización desde que arranca la app.</param>
-    public App(AppShell shell, ISessionManager session, INavigationService navigation, RecommendationNotifier recommendations)
+    /// <param name="recommendations">Se piden aquí para que escuchen cada sincronización desde que arranca la app:</param>
+    /// <param name="push">registra el teléfono para avisos push,</param>
+    /// <param name="badge">y enciende el punto de la campana.</param>
+    public App(
+        AppShell shell,
+        ISessionManager session,
+        INavigationService navigation,
+        RecommendationNotifier recommendations,
+        PushRegistration push,
+        RecommendationBadge badge)
     {
-        _ = recommendations;
+        _ = (recommendations, push);
+        _ = badge.RefreshAsync();
         InitializeComponent();
         _shell = shell;
 

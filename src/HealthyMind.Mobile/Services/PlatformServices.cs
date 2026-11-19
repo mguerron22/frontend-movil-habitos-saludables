@@ -108,6 +108,38 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
         set => preferences.Set(PresentationModeKey, value);
     }
 
+    public string? PushRegistration
+    {
+        get => preferences.Get<string?>("push_registration", null);
+        set => preferences.Set("push_registration", value);
+    }
+
+    public DateTimeOffset? LastSeenRecommendationAt
+    {
+        get
+        {
+            var ticks = preferences.Get("last_seen_recommendation", 0L);
+            return ticks == 0 ? null : new DateTimeOffset(ticks, TimeSpan.Zero);
+        }
+        set => preferences.Set("last_seen_recommendation", value?.UtcTicks ?? 0L);
+    }
+
+    public bool ReminderEnabled
+    {
+        get => preferences.Get("reminder_enabled", false);
+        set => preferences.Set("reminder_enabled", value);
+    }
+
+    public TimeOnly? ReminderTime
+    {
+        get
+        {
+            var minutes = preferences.Get("reminder_minutes", -1);
+            return minutes < 0 ? null : TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(minutes));
+        }
+        set => preferences.Set("reminder_minutes", value is { } time ? (int)time.ToTimeSpan().TotalMinutes : -1);
+    }
+
     /// <summary>
     /// Release: el servidor de producción (HTTPS, detrás del IIS).
     /// Debug: el emulador de Android llega a la PC por 10.0.2.2; Windows, por localhost.
@@ -206,6 +238,28 @@ internal sealed class NoAppNotifications : IAppNotifications
     public Task<bool> EnsurePermissionAsync() => Task.FromResult(false);
 
     public void ShowRecommendation(string title, string text)
+    {
+    }
+
+    public void ShowReminder(string title, string text)
+    {
+    }
+}
+
+/// <summary>En Windows no hay Firebase.</summary>
+internal sealed class NoPushTokenSource : IPushTokenSource
+{
+    public Task<string?> GetTokenAsync() => Task.FromResult<string?>(null);
+}
+
+/// <summary>En Windows no hay recordatorios en segundo plano.</summary>
+internal sealed class NoReminderSchedule : IReminderSchedule
+{
+    public void Schedule(TimeOnly at)
+    {
+    }
+
+    public void Cancel()
     {
     }
 }

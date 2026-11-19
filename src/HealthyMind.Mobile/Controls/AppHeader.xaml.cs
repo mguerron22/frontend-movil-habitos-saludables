@@ -1,10 +1,13 @@
 using HealthyMind.Mobile.Core.Connectivity;
+using HealthyMind.Mobile.Core.Notifications;
+using HealthyMind.Mobile.Services;
 
 namespace HealthyMind.Mobile.Controls;
 
 public partial class AppHeader : ContentView
 {
     private IConnectivityService? _connectivity;
+    private RecommendationBadge? _badge;
 
     public static readonly BindableProperty SectionProperty = BindableProperty.Create(
         nameof(Section),
@@ -47,11 +50,35 @@ public partial class AppHeader : ContentView
             _connectivity.StatusChanged -= OnStatusChanged;
         }
 
-        _connectivity = Handler?.MauiContext?.Services.GetService<IConnectivityService>();
+        if (_badge is not null)
+        {
+            _badge.Changed -= OnBadgeChanged;
+        }
+
+        var services = Handler?.MauiContext?.Services;
+        _connectivity = services?.GetService<IConnectivityService>();
         if (_connectivity is not null)
         {
             _connectivity.StatusChanged += OnStatusChanged;
             OfflineIcon.IsVisible = !_connectivity.IsOnline;
+        }
+
+        _badge = services?.GetService<RecommendationBadge>();
+        if (_badge is not null)
+        {
+            _badge.Changed += OnBadgeChanged;
+            UnreadDot.IsVisible = _badge.HasUnread;
+        }
+    }
+
+    private void OnBadgeChanged(object? sender, EventArgs e) =>
+        Dispatcher.Dispatch(() => UnreadDot.IsVisible = _badge?.HasUnread == true);
+
+    private async void OnBellTapped(object? sender, TappedEventArgs e)
+    {
+        if (Shell.Current is { } shell)
+        {
+            await shell.GoToAsync($"//{Routes.Main}/{Routes.Insights}");
         }
     }
 

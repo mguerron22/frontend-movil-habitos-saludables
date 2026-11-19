@@ -23,7 +23,8 @@ public sealed partial class ProfileViewModel(
     INavigationService navigation,
     IDialogService dialogs,
     IConnectivityService connectivity,
-    IUiDispatcher ui) : ViewModelBase
+    IUiDispatcher ui,
+    DailyReminder reminder) : ViewModelBase
 {
     private bool _loading;
     private bool _watching;
@@ -62,6 +63,14 @@ public sealed partial class ProfileViewModel(
     [ObservableProperty]
     private bool _isPresentationEnabled;
 
+    /// <summary>Recordatorio diario de hábitos pendientes (funciona sin conexión).</summary>
+    [ObservableProperty]
+    private bool _isReminderEnabled;
+
+    /// <summary>Hora del recordatorio (TimeSpan porque es lo que usa el TimePicker).</summary>
+    [ObservableProperty]
+    private TimeSpan _reminderTime = DailyReminder.DefaultTime.ToTimeSpan();
+
     public async Task LoadAsync()
     {
         IsOnline = connectivity.IsOnline;
@@ -82,6 +91,8 @@ public sealed partial class ProfileViewModel(
         IsBiometricEnabled = settings.BiometricEnabled;
         IsLocationEnabled = location.IsEnabled;
         IsPresentationEnabled = presentation.IsEnabled;
+        IsReminderEnabled = reminder.IsEnabled;
+        ReminderTime = reminder.Time.ToTimeSpan();
         _loading = false;
     }
 
@@ -159,6 +170,41 @@ public sealed partial class ProfileViewModel(
                 "Ahora no"))
         {
             presentation.OpenPrecisionSettings();
+        }
+    }
+
+    async partial void OnIsReminderEnabledChanged(bool value)
+    {
+        if (_loading || value == reminder.IsEnabled)
+        {
+            return;
+        }
+
+        if (!value)
+        {
+            reminder.Disable();
+            return;
+        }
+
+        if (!await notifications.EnsurePermissionAsync())
+        {
+            _loading = true;
+            IsReminderEnabled = false;
+            _loading = false;
+            await dialogs.AlertAsync(
+                "Sin permiso de notificaciones",
+                "Permite las notificaciones a HealthyMindIA en los ajustes del teléfono para recibir el recordatorio.");
+            return;
+        }
+
+        reminder.Enable(TimeOnly.FromTimeSpan(ReminderTime));
+    }
+
+    partial void OnReminderTimeChanged(TimeSpan value)
+    {
+        if (!_loading && reminder.IsEnabled)
+        {
+            reminder.Enable(TimeOnly.FromTimeSpan(value));
         }
     }
 

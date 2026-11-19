@@ -25,6 +25,7 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
     private readonly ISyncService _sync;
     private readonly IUiDispatcher _ui;
     private readonly TimeProvider _timeProvider;
+    private readonly Notifications.RecommendationBadge _badge;
 
     [ObservableProperty]
     private string _initials = string.Empty;
@@ -71,8 +72,10 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
         ISessionManager session,
         ISyncService sync,
         IUiDispatcher ui,
-        TimeProvider timeProvider)
+        TimeProvider timeProvider,
+        Notifications.RecommendationBadge badge)
     {
+        _badge = badge;
         _recommendations = recommendations;
         _habits = habits;
         _session = session;
@@ -94,6 +97,7 @@ public sealed partial class InsightsViewModel : ViewModelBase, IDisposable
     public async Task LoadAsync()
     {
         Initials = _session.CurrentUser?.Initials ?? string.Empty;
+        _badge.MarkSeen(); // Abrir la pestaña IA apaga el punto de la campana.
         await ReloadAsync();
         _sync.RequestSync();
     }

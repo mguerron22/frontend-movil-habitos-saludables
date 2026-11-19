@@ -73,6 +73,14 @@ internal sealed class FakeSettings : IAppSettings
     public DateTimeOffset? LastNotifiedRecommendationAt { get; set; }
 
     public bool PresentationMode { get; set; }
+
+    public string? PushRegistration { get; set; }
+
+    public DateTimeOffset? LastSeenRecommendationAt { get; set; }
+
+    public bool ReminderEnabled { get; set; }
+
+    public TimeOnly? ReminderTime { get; set; }
 }
 
 internal sealed class FakeTokenStore : ISecureTokenStore

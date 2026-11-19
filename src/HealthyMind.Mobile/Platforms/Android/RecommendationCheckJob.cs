@@ -42,10 +42,16 @@ internal sealed class RecommendationCheckJob : JobService
     /// Modo presentación: una revisión ya mismo que además pide a la IA una recomendación nueva.
     /// Va como trabajo (y no dentro de la alarma) porque la IA puede tardar más de lo que Android le da a una alarma.
     /// </summary>
-    public static void RunPresentationCheck(Context context)
+    public static void RunPresentationCheck(Context context) => RunNow(context, askForNew: true);
+
+    /// <summary>
+    /// Revisión inmediata. Con <paramref name="askForNew"/> pide además una recomendación nueva (modo presentación);
+    /// sin él solo sincroniza (llegó un push y hay que guardar la recomendación en el teléfono).
+    /// </summary>
+    public static void RunNow(Context context, bool askForNew)
     {
         var extras = new PersistableBundle();
-        extras.PutBoolean(AskForNewExtra, true);
+        extras.PutBoolean(AskForNewExtra, askForNew);
 
         var job = new JobInfo.Builder(PresentationJobId, new ComponentName(context, Java.Lang.Class.FromType(typeof(RecommendationCheckJob))));
         job.SetRequiredNetworkType(NetworkType.Any);

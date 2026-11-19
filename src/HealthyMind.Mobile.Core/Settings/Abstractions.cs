@@ -34,6 +34,18 @@ public interface IAppSettings
 
     /// <summary>Modo presentación encendido: la IA escribe cada pocos minutos (ver <see cref="Notifications.PresentationMode"/>).</summary>
     bool PresentationMode { get; set; }
+
+    /// <summary>"usuario|token" ya registrado en el servidor para avisos push (ver <see cref="Notifications.PushRegistration"/>).</summary>
+    string? PushRegistration { get; set; }
+
+    /// <summary>Cuándo abrió el usuario la pestaña IA por última vez: apaga el punto de la campana.</summary>
+    DateTimeOffset? LastSeenRecommendationAt { get; set; }
+
+    /// <summary>Recordatorio diario de hábitos pendientes encendido.</summary>
+    bool ReminderEnabled { get; set; }
+
+    /// <summary>Hora local del recordatorio; null = la de por defecto (20:00).</summary>
+    TimeOnly? ReminderTime { get; set; }
 }
 
 /// <summary>Almacenamiento cifrado del refresh token (en MAUI: SecureStorage, respaldado por Android Keystore).</summary>

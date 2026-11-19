@@ -14,6 +14,9 @@ public interface IAppNotifications
 
     /// <summary>Aviso de recomendación nueva; al tocarlo se abre la pestaña IA.</summary>
     void ShowRecommendation(string title, string text);
+
+    /// <summary>Recordatorio diario de hábitos pendientes; al tocarlo se abre la app.</summary>
+    void ShowReminder(string title, string text);
 }
 
 /// <summary>

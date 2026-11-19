@@ -72,6 +72,8 @@ public sealed class RecommendationNotifierTests : LocalDataTest
         public Task<bool> EnsurePermissionAsync() => Task.FromResult(true);
 
         public void ShowRecommendation(string title, string text) => Shown.Add(title);
+
+        public void ShowReminder(string title, string text) => Shown.Add(text);
     }
 
     private sealed class FakeSync : ISyncService
