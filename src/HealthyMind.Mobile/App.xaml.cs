@@ -17,9 +17,10 @@ public partial class App : Application
         INavigationService navigation,
         RecommendationNotifier recommendations,
         PushRegistration push,
-        RecommendationBadge badge)
+        RecommendationBadge badge,
+        RecommendationFeedback feedback)
     {
-        _ = (recommendations, push);
+        _ = (recommendations, push, feedback);
         _ = badge.RefreshAsync();
         InitializeComponent();
         _shell = shell;

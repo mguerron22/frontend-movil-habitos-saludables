@@ -73,7 +73,13 @@ public sealed class RecommendationNotifierTests : LocalDataTest
 
         public void ShowRecommendation(string title, string text) => Shown.Add(title);
 
-        public void ShowReminder(string title, string text) => Shown.Add(text);
+        public void ShowReminder(string reminderId, string title, string text, Guid? habitId = null) => Shown.Add(text);
+
+        public void ShowAnnouncement(string title, string text) => Shown.Add(title);
+
+        public void Dismiss(string reminderId)
+        {
+        }
     }
 
     private sealed class FakeSync : ISyncService

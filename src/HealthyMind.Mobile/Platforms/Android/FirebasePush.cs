@@ -27,6 +27,21 @@ internal sealed class AndroidPushTokenSource(ILogger<AndroidPushTokenSource> log
         }
     }
 
+    public Task SubscribeAsync(string topic)
+    {
+        try
+        {
+            // Firebase guarda la suscripción y la reintenta solo si no hay red: no hace falta esperar.
+            FirebaseMessaging.Instance.SubscribeToTopic(topic);
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            logger.LogInformation(exception, "No se pudo suscribir al tema {Topic}.", topic);
+        }
+
+        return Task.CompletedTask;
+    }
+
     private sealed class TokenListener(TaskCompletionSource<string?> completion) : Java.Lang.Object, IOnCompleteListener
     {
         public void OnComplete(global::Android.Gms.Tasks.Task task) =>

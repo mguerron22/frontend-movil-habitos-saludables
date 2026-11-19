@@ -5,7 +5,7 @@ namespace HealthyMind.Mobile.Core.Tests;
 
 public sealed class HabitEditorTests
 {
-    private readonly HabitEditorViewModel _vm = new(null!, null!, null!);
+    private readonly HabitEditorViewModel _vm = new(null!, null!, null!, null!);
 
     [Fact]
     public void Step_counter_is_offered_only_for_exercise()

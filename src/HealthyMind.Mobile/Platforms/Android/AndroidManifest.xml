@@ -22,6 +22,8 @@
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<!-- Modo presentación: aviso cada 3 minutos. Android 12+ lo pide en Ajustes > Alarmas y recordatorios; sin él llega con retraso. -->
 	<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+	<!-- Para pedir (una sola vez y con explicación) que la batería no corte los avisos. -->
+	<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 	<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false" />
 	<uses-feature android:name="android.hardware.location" android:required="false" />
 </manifest>

@@ -18,6 +18,6 @@ public class MainApplication : MauiApplication
 		base.OnCreate();
 		Platforms.Android.RecommendationCheckJob.Schedule(this);
 		IPlatformApplication.Current?.Services.GetRequiredService<Core.Notifications.PresentationMode>().Restore();
-		IPlatformApplication.Current?.Services.GetRequiredService<Core.Notifications.DailyReminder>().Restore();
+		_ = IPlatformApplication.Current?.Services.GetRequiredService<Core.Notifications.Reminders>().RestoreAsync();
 	}
 }

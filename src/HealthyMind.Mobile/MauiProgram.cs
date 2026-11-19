@@ -74,6 +74,7 @@ public static class MauiProgram
         services.AddSingleton<IPresentationSchedule, Platforms.Android.AndroidPresentationSchedule>();
         services.AddSingleton<IPushTokenSource, Platforms.Android.AndroidPushTokenSource>();
         services.AddSingleton<IReminderSchedule, Platforms.Android.AndroidReminderSchedule>();
+        services.AddSingleton<IBatteryOptimization, Platforms.Android.AndroidBatteryOptimization>();
 #elif WINDOWS
         services.AddSingleton<IBiometricAuthenticator, Platforms.Windows.WindowsHelloAuthenticator>();
         services.AddSingleton<IStepSensor, NoStepSensor>();
@@ -81,6 +82,7 @@ public static class MauiProgram
         services.AddSingleton<IPresentationSchedule, NoPresentationSchedule>();
         services.AddSingleton<IPushTokenSource, NoPushTokenSource>();
         services.AddSingleton<IReminderSchedule, NoReminderSchedule>();
+        services.AddSingleton<IBatteryOptimization, NoBatteryOptimization>();
 #endif
     }
 
