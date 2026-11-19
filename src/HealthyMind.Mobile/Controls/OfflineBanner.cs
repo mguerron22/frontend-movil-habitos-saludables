@@ -9,11 +9,22 @@ namespace HealthyMind.Mobile.Controls;
 /// </summary>
 public sealed class OfflineBanner : ContentView
 {
+    private readonly Label _message;
     private IConnectivityService? _connectivity;
 
     public OfflineBanner()
     {
         IsVisible = false;
+        _message = new Label
+        {
+            Text = OfflineReasons.Describe(OfflineReason.ServerDown),
+            TextColor = Color.FromArgb("#B45309"),
+            FontSize = 13,
+            FontFamily = "OpenSansSemibold",
+            LineBreakMode = LineBreakMode.WordWrap,
+            MaximumWidthRequest = 280,
+            VerticalOptions = LayoutOptions.Center,
+        };
         Content = new Border
         {
             BackgroundColor = Color.FromArgb("#FFEBD9"),
@@ -27,16 +38,7 @@ public sealed class OfflineBanner : ContentView
                 Children =
                 {
                     new Image { Source = "ic_wifi_off.png", WidthRequest = 20, HeightRequest = 20, VerticalOptions = LayoutOptions.Center },
-                    new Label
-                    {
-                        Text = "Sin conexión. Tus cambios se guardan en el teléfono y se enviarán al volver.",
-                        TextColor = Color.FromArgb("#B45309"),
-                        FontSize = 13,
-                        FontFamily = "OpenSansSemibold",
-                        LineBreakMode = LineBreakMode.WordWrap,
-                        MaximumWidthRequest = 280,
-                        VerticalOptions = LayoutOptions.Center,
-                    },
+                    _message,
                 },
             },
         };
@@ -55,11 +57,20 @@ public sealed class OfflineBanner : ContentView
         if (_connectivity is not null)
         {
             _connectivity.StatusChanged += OnStatusChanged;
-            IsVisible = !_connectivity.IsOnline;
+            Refresh(_connectivity.IsOnline);
         }
     }
 
     // El aviso puede llegar desde un hilo de fondo (timer o petición HTTP): la UI se toca en el hilo principal.
     private void OnStatusChanged(object? sender, bool online) =>
-        Dispatcher.Dispatch(() => IsVisible = !online);
+        Dispatcher.Dispatch(() => Refresh(online));
+
+    private void Refresh(bool online)
+    {
+        IsVisible = !online;
+        if (!online && _connectivity is not null)
+        {
+            _message.Text = OfflineReasons.Describe(_connectivity.Reason);
+        }
+    }
 }

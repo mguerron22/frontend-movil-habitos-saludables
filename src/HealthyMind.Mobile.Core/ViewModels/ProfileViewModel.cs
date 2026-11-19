@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HealthyMind.Mobile.Core.Auth;
+using HealthyMind.Mobile.Core.Connectivity;
 using HealthyMind.Mobile.Core.Habits;
 using HealthyMind.Mobile.Core.Navigation;
 using HealthyMind.Mobile.Core.Notifications;
@@ -20,9 +21,19 @@ public sealed partial class ProfileViewModel(
     PresentationMode presentation,
     IAppNotifications notifications,
     INavigationService navigation,
-    IDialogService dialogs) : ViewModelBase
+    IDialogService dialogs,
+    IConnectivityService connectivity,
+    IUiDispatcher ui) : ViewModelBase
 {
     private bool _loading;
+    private bool _watching;
+
+    /// <summary>Editar perfil, contraseña, dispositivos y administración hablan directo con el servidor.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsOffline))]
+    private bool _isOnline = true;
+
+    public bool IsOffline => !IsOnline;
 
     [ObservableProperty]
     private string _fullName = string.Empty;
@@ -53,6 +64,13 @@ public sealed partial class ProfileViewModel(
 
     public async Task LoadAsync()
     {
+        IsOnline = connectivity.IsOnline;
+        if (!_watching)
+        {
+            connectivity.StatusChanged += OnConnectivityChanged;
+            _watching = true;
+        }
+
         _loading = true;
         var user = session.CurrentUser;
         FullName = user?.FullName ?? string.Empty;
@@ -144,17 +162,39 @@ public sealed partial class ProfileViewModel(
         }
     }
 
-    [RelayCommand]
-    private Task EditProfileAsync() => navigation.GoToEditProfileAsync();
+    /// <summary>Al salir de la pantalla deja de escuchar la conexión (el servicio vive toda la app).</summary>
+    public void Unload()
+    {
+        if (_watching)
+        {
+            connectivity.StatusChanged -= OnConnectivityChanged;
+            _watching = false;
+        }
+    }
 
     [RelayCommand]
-    private Task ChangePasswordAsync() => navigation.GoToChangePasswordAsync();
+    private Task EditProfileAsync() => WhenOnlineAsync(navigation.GoToEditProfileAsync);
 
     [RelayCommand]
-    private Task SessionsAsync() => navigation.GoToSessionsAsync();
+    private Task ChangePasswordAsync() => WhenOnlineAsync(navigation.GoToChangePasswordAsync);
 
     [RelayCommand]
-    private Task AdminUsersAsync() => navigation.GoToAdminUsersAsync();
+    private Task SessionsAsync() => WhenOnlineAsync(navigation.GoToSessionsAsync);
+
+    [RelayCommand]
+    private Task AdminUsersAsync() => WhenOnlineAsync(navigation.GoToAdminUsersAsync);
+
+    private Task WhenOnlineAsync(Func<Task> open) =>
+        connectivity.IsOnline
+            ? open()
+            : dialogs.AlertAsync("Necesita conexión", OfflineReasons.Describe(connectivity.Reason) + "\n\nEsta opción se usa con conexión al servidor.");
+
+    private void OnConnectivityChanged(object? sender, bool online) =>
+        _ = ui.InvokeAsync(() =>
+        {
+            IsOnline = online;
+            return Task.CompletedTask;
+        });
 
     [RelayCommand]
     private async Task LogoutAsync()

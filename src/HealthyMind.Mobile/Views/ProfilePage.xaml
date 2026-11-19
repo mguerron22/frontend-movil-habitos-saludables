@@ -29,7 +29,18 @@
                 </Border>
 
                 <Label Text="Cuenta" Style="{StaticResource Subtitle}" />
+                <Border Style="{StaticResource Chip}" BackgroundColor="#FFEBD9" HorizontalOptions="Start" IsVisible="{Binding IsOffline}">
+                    <HorizontalStackLayout Spacing="6">
+                        <Image Source="ic_wifi_off.png" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                        <Label Text="Estas opciones necesitan conexión" TextColor="#B45309" FontSize="12" FontFamily="OpenSansSemibold" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
                 <Border Style="{StaticResource Card}" Padding="18,4">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsOnline}" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <VerticalStackLayout>
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" Padding="0,12">
                         <Grid.GestureRecognizers>
@@ -76,6 +87,11 @@
                 </Border>
 
                 <Border Style="{StaticResource Card}" Padding="18,4" IsVisible="{Binding IsAdmin}">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsOnline}" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" Padding="0,12">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AdminUsersCommand}" />

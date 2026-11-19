@@ -24,17 +24,17 @@ public sealed class HealthServerProbe(IHttpClientFactory httpClientFactory, Sett
 {
     public const string HttpClientName = "health";
 
-    public async Task<bool> IsReachableAsync(CancellationToken cancellationToken)
+    public async Task<Connectivity.OfflineReason?> CheckAsync(CancellationToken cancellationToken)
     {
         try
         {
             using var client = httpClientFactory.CreateClient(HttpClientName);
             using var response = await client.GetAsync(new Uri(new Uri(settings.ApiBaseUrl), "health"), cancellationToken);
-            return response.IsSuccessStatusCode;
+            return response.IsSuccessStatusCode ? null : Connectivity.OfflineReason.ServerDown;
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException or UriFormatException)
         {
-            return false;
+            return Connectivity.OfflineReasons.From(exception);
         }
     }
 }

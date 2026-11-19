@@ -98,7 +98,13 @@ internal sealed class FakeConnectivity : IConnectivityService
 
     public event EventHandler<bool>? StatusChanged;
 
-    public void ReportServerUnreachable() => IsOnline = false;
+    public OfflineReason Reason { get; set; } = OfflineReason.ServerDown;
+
+    public void ReportServerUnreachable(OfflineReason reason = OfflineReason.ServerDown)
+    {
+        IsOnline = false;
+        Reason = reason;
+    }
 
     public void ReportServerReachable() => IsOnline = true;
 

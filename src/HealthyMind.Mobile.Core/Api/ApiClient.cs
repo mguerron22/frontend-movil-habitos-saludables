@@ -65,8 +65,13 @@ public abstract class ApiClient(HttpClient httpClient, IConnectivityService conn
         catch (Exception exception) when (exception is HttpRequestException
                                           || (exception is TaskCanceledException && !cancellationToken.IsCancellationRequested))
         {
-            connectivity.ReportServerUnreachable();
-            throw new ServerUnreachableException("No hay conexión con el servidor.", exception);
+            var reason = OfflineReasons.From(exception);
+            connectivity.ReportServerUnreachable(reason);
+            throw new ServerUnreachableException(
+                reason == OfflineReason.Certificate
+                    ? "No se pudo verificar la seguridad del servidor (certificado)."
+                    : "No hay conexión con el servidor.",
+                exception);
         }
 
         connectivity.ReportServerReachable();

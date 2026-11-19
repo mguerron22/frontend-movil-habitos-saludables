@@ -17,4 +17,10 @@ public partial class ProfilePage : ContentPage
         base.OnAppearing();
         await _viewModel.LoadAsync();
     }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _viewModel.Unload();
+    }
 }
