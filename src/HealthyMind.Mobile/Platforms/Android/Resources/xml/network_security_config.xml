@@ -11,17 +11,4 @@
 		<domain includeSubdomains="false">localhost</domain>
 		<domain includeSubdomains="false">127.0.0.1</domain>
 	</domain-config>
-	<!--
-	  Producción: el certificado *.appservices.com.ec (Sectigo) termina en la raíz "Sectigo Public Server
-	  Authentication Root R46", que Android 13 y anteriores no traen en el sistema (llegó en Android 14).
-	  Se confía en ella SOLO para este dominio, además de las raíces del sistema.
-	  SHA-256: 7B:B6:47:A6:2A:EE:AC:88:BF:25:7A:A5:22:D0:1F:FE:A3:95:E0:AB:45:C7:3F:93:F6:56:54:EC:38:F2:5A:06
-	-->
-	<domain-config cleartextTrafficPermitted="false">
-		<domain includeSubdomains="false">maui.appservices.com.ec</domain>
-		<trust-anchors>
-			<certificates src="system" />
-			<certificates src="@raw/sectigo_r46" />
-		</trust-anchors>
-	</domain-config>
 </network-security-config>
