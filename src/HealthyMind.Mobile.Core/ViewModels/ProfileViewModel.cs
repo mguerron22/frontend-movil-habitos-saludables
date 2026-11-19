@@ -256,7 +256,7 @@ public sealed partial class ProfileViewModel(
     private Task SessionsAsync() => WhenOnlineAsync(navigation.GoToSessionsAsync);
 
     [RelayCommand]
-    private Task AdminUsersAsync() => WhenOnlineAsync(navigation.GoToAdminUsersAsync);
+    private Task AdminUsersAsync() => WhenOnlineAsync(navigation.GoToAdminDashboardAsync);
 
     private Task WhenOnlineAsync(Func<Task> open) =>
         connectivity.IsOnline

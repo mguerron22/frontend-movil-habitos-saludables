@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Bienvenida del primer uso (RNF02): qué datos usa la app, para qué, permisos con su motivo y aceptación de la política. -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.WelcomePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:WelcomeViewModel"
+    Background="{StaticResource PageGlow}">
+
+    <ContentPage.Resources>
+        <Style x:Key="PermissionIcon" TargetType="Border">
+            <Setter Property="WidthRequest" Value="40" />
+            <Setter Property="HeightRequest" Value="40" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="BackgroundColor" Value="{StaticResource MintSoft}" />
+            <Setter Property="VerticalOptions" Value="Start" />
+        </Style>
+        <Style x:Key="AllowButton" TargetType="Button" BasedOn="{StaticResource SoftButton}">
+            <Setter Property="HeightRequest" Value="36" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="GrantedChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="22,28,22,32" Spacing="16">
+            <Image Source="logo.png" WidthRequest="72" HeightRequest="72" HorizontalOptions="Center" />
+
+            <VerticalStackLayout Spacing="6">
+                <Label HorizontalOptions="Center" Style="{StaticResource Display}" FontSize="26">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Bienvenido a HealthyMind" />
+                            <Span Text="IA" TextColor="{StaticResource Primary}" />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+                <Label Style="{StaticResource Body}" HorizontalTextAlignment="Center"
+                       Text="Antes de empezar, te contamos qué datos usa la app y para qué. Tú decides qué permitir; puedes cambiarlo luego en Perfil o en los ajustes del teléfono." />
+            </VerticalStackLayout>
+
+            <!-- Qué se hace con los datos -->
+            <Border Style="{StaticResource SoftCard}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Tus datos" FontFamily="OpenSansSemibold" TextColor="{StaticResource PrimaryDark}" />
+                    <Label Style="{StaticResource Body}" FontSize="13"
+                           Text="• Tus hábitos y registros se guardan en este teléfono y se sincronizan con nuestro servidor para no perderlos." />
+                    <Label Style="{StaticResource Body}" FontSize="13"
+                           Text="• La IA recibe solo cifras y nombres de hábitos (porcentajes, rachas). Nunca tu nombre, correo ni ubicación." />
+                    <Label Style="{StaticResource Body}" FontSize="13"
+                           Text="• No vendemos ni compartimos tus datos con terceros con fines comerciales." />
+                </VerticalStackLayout>
+            </Border>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Permisos" Style="{StaticResource Subtitle}" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="Permitir todos" Style="{StaticResource Link}" FontSize="14" VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AllowAllCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+
+            <Border Style="{StaticResource Card}" Padding="16">
+                <VerticalStackLayout Spacing="16">
+                    <!-- Notificaciones -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border Style="{StaticResource PermissionIcon}">
+                            <Image Source="ic_bell.png" WidthRequest="20" HeightRequest="20" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Notificaciones" FontFamily="OpenSansSemibold" />
+                            <Label Style="{StaticResource Caption}" FontSize="12"
+                                   Text="Recordatorios de tus hábitos, aviso de racha en riesgo y nuevas recomendaciones de la IA." />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Style="{StaticResource AllowButton}" Text="Permitir" Command="{Binding AllowNotificationsCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding NotificationsGranted}" Value="True">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Border Grid.Column="2" Style="{StaticResource GrantedChip}" IsVisible="{Binding NotificationsGranted}">
+                            <Label Text="Permitido" Style="{StaticResource ChipText}" FontSize="12" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Pasos -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" IsVisible="{Binding StepsSupported}">
+                        <Border Style="{StaticResource PermissionIcon}">
+                            <Image Source="ic_steps.png" WidthRequest="20" HeightRequest="20" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Actividad física (pasos)" FontFamily="OpenSansSemibold" />
+                            <Label Style="{StaticResource Caption}" FontSize="12"
+                                   Text="Cuenta tus pasos con el sensor del teléfono para registrar solo los hábitos de caminar. No usa GPS." />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Style="{StaticResource AllowButton}" Text="Permitir" Command="{Binding AllowStepsCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding StepsGranted}" Value="True">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Border Grid.Column="2" Style="{StaticResource GrantedChip}" IsVisible="{Binding StepsGranted}">
+                            <Label Text="Permitido" Style="{StaticResource ChipText}" FontSize="12" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Ubicación (opcional) -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border Style="{StaticResource PermissionIcon}">
+                            <Image Source="ic_map_pin.png" WidthRequest="20" HeightRequest="20" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Ubicación (opcional)" FontFamily="OpenSansSemibold" />
+                            <Label Style="{StaticResource Caption}" FontSize="12"
+                                   Text="Guarda dónde registraste cada hábito, solo en el momento de registrarlo. Nunca en segundo plano y nunca va a la IA." />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Style="{StaticResource AllowButton}" Text="Activar" Command="{Binding AllowLocationCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding LocationGranted}" Value="True">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Border Grid.Column="2" Style="{StaticResource GrantedChip}" IsVisible="{Binding LocationGranted}">
+                            <Label Text="Activada" Style="{StaticResource ChipText}" FontSize="12" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Batería -->
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border Style="{StaticResource PermissionIcon}">
+                            <Image Source="ic_bolt.png" WidthRequest="20" HeightRequest="20" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Batería sin restricciones" FontFamily="OpenSansSemibold" />
+                            <Label Style="{StaticResource Caption}" FontSize="12"
+                                   Text="Evita que el ahorro de batería retrase o corte los recordatorios. El consumo es mínimo." />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2" Style="{StaticResource AllowButton}" Text="Permitir" Command="{Binding AllowBatteryCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding BatteryUnrestricted}" Value="True">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                        <Border Grid.Column="2" Style="{StaticResource GrantedChip}" IsVisible="{Binding BatteryUnrestricted}">
+                            <Label Text="Listo" Style="{StaticResource ChipText}" FontSize="12" />
+                        </Border>
+                    </Grid>
+
+                    <!-- Huella: se ofrece después de iniciar sesión, aquí solo se explica. -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                        <Border Style="{StaticResource PermissionIcon}">
+                            <Image Source="ic_fingerprint.png" WidthRequest="20" HeightRequest="20" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Huella" FontFamily="OpenSansSemibold" />
+                            <Label Style="{StaticResource Caption}" FontSize="12"
+                                   Text="Te la ofreceremos al iniciar sesión. La huella nunca sale de tu teléfono: solo desbloquea tu sesión guardada." />
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Política de privacidad -->
+            <Border Style="{StaticResource Card}" Padding="14,10">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <CheckBox IsChecked="{Binding AcceptedPolicy}" Color="{StaticResource Primary}" VerticalOptions="Center"
+                              AutomationId="AcceptPolicy" />
+                    <Label Grid.Column="1" VerticalOptions="Center" FontSize="14">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="He leído y acepto la " TextColor="{StaticResource TextPrimary}" />
+                                <Span Text="política de privacidad" TextColor="{StaticResource Primary}" FontFamily="OpenSansSemibold" TextDecorations="Underline">
+                                    <Span.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenPrivacyCommand}" />
+                                    </Span.GestureRecognizers>
+                                </Span>
+                                <Span Text=" y el uso de mis datos descrito arriba." TextColor="{StaticResource TextPrimary}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </Grid>
+            </Border>
+
+            <Button Style="{StaticResource PrimaryButton}" Text="Continuar" ImageSource="ic_arrow_right.png" ContentLayout="Right,8"
+                    Command="{Binding ContinueCommand}" AutomationId="WelcomeContinue" />
+
+            <Label Style="{StaticResource Caption}" FontSize="12" HorizontalTextAlignment="Center"
+                   Text="Ningún permiso es obligatorio: la app funciona igual, solo sin esa parte." />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

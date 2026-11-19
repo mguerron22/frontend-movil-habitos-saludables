@@ -9,8 +9,20 @@ public sealed class AuthApi(AnonymousApiClient api)
     public Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default) =>
         api.PostAsync<AuthResponse>("api/auth/login", request, cancellationToken);
 
-    public Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default) =>
-        api.PostAsync<AuthResponse>("api/auth/register", request, cancellationToken);
+    public Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default) =>
+        api.PostAsync<RegisterResponse>("api/auth/register", request, cancellationToken);
+
+    public Task<AuthResponse> VerifyEmailAsync(VerifyEmailRequest request, CancellationToken cancellationToken = default) =>
+        api.PostAsync<AuthResponse>("api/auth/email/verify", request, cancellationToken);
+
+    public Task ResendVerificationAsync(EmailRequest request, CancellationToken cancellationToken = default) =>
+        api.SendAsync(HttpMethod.Post, "api/auth/email/resend", request, cancellationToken);
+
+    public Task ForgotPasswordAsync(EmailRequest request, CancellationToken cancellationToken = default) =>
+        api.SendAsync(HttpMethod.Post, "api/auth/password/forgot", request, cancellationToken);
+
+    public Task ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default) =>
+        api.SendAsync(HttpMethod.Post, "api/auth/password/reset", request, cancellationToken);
 
     public Task<AuthResponse> RefreshAsync(RefreshRequest request, CancellationToken cancellationToken = default) =>
         api.PostAsync<AuthResponse>("api/auth/refresh", request, cancellationToken);

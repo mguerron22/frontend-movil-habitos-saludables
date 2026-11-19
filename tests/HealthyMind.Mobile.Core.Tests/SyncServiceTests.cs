@@ -198,7 +198,10 @@ public sealed class SyncServiceTests : LocalDataTest
 
         public Task LoginAsync(string usernameOrEmail, string password, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-        public Task RegisterAsync(NewAccount account, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task<string> RegisterAsync(NewAccount account, CancellationToken cancellationToken = default) =>
+            Task.FromResult(account.Email);
+
+        public Task VerifyEmailAsync(string email, string code, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public Task<ResumeOutcome> ResumeAsync(CancellationToken cancellationToken = default) => Task.FromResult(ResumeOutcome.Online);
 

@@ -89,6 +89,8 @@ internal sealed class FakeSettings : IAppSettings
     public DateTimeOffset? SeenSyncPending { get; set; }
 
     public bool BatteryPromptShown { get; set; }
+
+    public int ConsentVersion { get; set; }
 }
 
 internal sealed class FakeTokenStore : ISecureTokenStore

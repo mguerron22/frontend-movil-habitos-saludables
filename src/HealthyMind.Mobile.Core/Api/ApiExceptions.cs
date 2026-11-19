@@ -7,12 +7,30 @@ namespace HealthyMind.Mobile.Core.Api;
 /// </summary>
 public sealed class ApiException : Exception
 {
-    public ApiException(HttpStatusCode statusCode, string message, IReadOnlyDictionary<string, string[]>? fieldErrors = null)
+    /// <summary>El servidor pide confirmar el correo antes de entrar (403 con este "code").</summary>
+    public const string EmailNotVerifiedCode = "email_not_verified";
+
+    public ApiException(
+        HttpStatusCode statusCode,
+        string message,
+        IReadOnlyDictionary<string, string[]>? fieldErrors = null,
+        string? code = null,
+        string? email = null)
         : base(message)
     {
         StatusCode = statusCode;
         FieldErrors = fieldErrors ?? new Dictionary<string, string[]>();
+        Code = code;
+        Email = email;
     }
+
+    /// <summary>Caso concreto que el servidor identifica (campo "code" del ProblemDetails).</summary>
+    public string? Code { get; }
+
+    /// <summary>Correo al que el servidor mandó el código, si aplica.</summary>
+    public string? Email { get; }
+
+    public bool IsEmailNotVerified => Code == EmailNotVerifiedCode;
 
     public HttpStatusCode StatusCode { get; }
 

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using HealthyMind.Mobile.Core.Api;
 using HealthyMind.Mobile.Core.Auth;
 using HealthyMind.Mobile.Core.Connectivity;
 using HealthyMind.Mobile.Core.Navigation;
@@ -34,6 +35,9 @@ public sealed partial class LoginViewModel(
 
     public string ServerUrl => settings.ApiBaseUrl;
 
+    /// <summary>El servidor respondió que falta confirmar el correo: se va a escribir el código.</summary>
+    private string? _pendingVerification;
+
     [RelayCommand]
     private async Task LoginAsync()
     {
@@ -43,9 +47,16 @@ public sealed partial class LoginViewModel(
             return;
         }
 
+        _pendingVerification = null;
         var ok = await RunAsync(() => session.LoginAsync(UsernameOrEmail, Password));
         if (!ok)
         {
+            if (_pendingVerification is { } email)
+            {
+                Password = string.Empty;
+                await navigation.GoToVerifyEmailAsync(email);
+            }
+
             return;
         }
 
@@ -60,6 +71,18 @@ public sealed partial class LoginViewModel(
 
     [RelayCommand]
     private Task GoToRegisterAsync() => navigation.GoToRegisterAsync();
+
+    [RelayCommand]
+    private Task ForgotPasswordAsync() => navigation.GoToForgotPasswordAsync();
+
+    protected override void OnApiError(ApiException exception)
+    {
+        base.OnApiError(exception);
+        if (exception.IsEmailNotVerified)
+        {
+            _pendingVerification = exception.Email ?? UsernameOrEmail.Trim();
+        }
+    }
 
     /// <summary>Para probar en un celular físico: la dirección del backend es la IP de la PC, no localhost.</summary>
     [RelayCommand]

@@ -13,7 +13,6 @@ namespace HealthyMind.Mobile.Core.ViewModels;
 /// </summary>
 public sealed partial class RegisterViewModel(
     ISessionManager session,
-    BiometricEnrollment biometricEnrollment,
     INavigationService navigation) : ViewModelBase
 {
     [ObservableProperty]
@@ -64,15 +63,17 @@ public sealed partial class RegisterViewModel(
             return;
         }
 
-        var ok = await RunAsync(() => session.RegisterAsync(new NewAccount(Username, Email, FirstName, LastName, Password)));
-        if (!ok)
+        string? email = null;
+        var ok = await RunAsync(async () =>
+            email = await session.RegisterAsync(new NewAccount(Username, Email, FirstName, LastName, Password)));
+        if (!ok || email is null)
         {
             return;
         }
 
+        // La sesión se abre cuando confirme el correo con el código.
         Password = ConfirmPassword = string.Empty;
-        await biometricEnrollment.OfferIfNeededAsync();
-        await navigation.GoToMainAsync();
+        await navigation.GoToVerifyEmailAsync(email);
     }
 
     [RelayCommand]

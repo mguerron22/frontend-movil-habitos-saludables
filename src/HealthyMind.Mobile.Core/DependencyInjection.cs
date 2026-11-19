@@ -65,6 +65,10 @@ public static class DependencyInjection
         services.AddTransient<StartupViewModel>();
         services.AddTransient<LoginViewModel>();
         services.AddTransient<RegisterViewModel>();
+        services.AddTransient<VerifyEmailViewModel>();
+        services.AddTransient<ForgotPasswordViewModel>();
+        services.AddTransient<WelcomeViewModel>();
+        services.AddTransient<AdminDashboardViewModel>();
         services.AddTransient<UnlockViewModel>();
         services.AddTransient<HomeViewModel>();
         services.AddTransient<ProfileViewModel>();

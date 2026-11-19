@@ -106,6 +106,12 @@
                         </Grid>
                     </Border>
 
+                    <Label Text="¿Olvidaste tu contraseña?" Style="{StaticResource Link}" FontSize="14" HorizontalOptions="End">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ForgotPasswordCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+
                     <Border Style="{StaticResource ErrorBox}" Margin="0,4,0,0" IsVisible="{Binding HasError}">
                         <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
                     </Border>

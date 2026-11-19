@@ -58,6 +58,9 @@ public interface IAppSettings
 
     /// <summary>Ya se explicó cómo quitar la restricción de batería: no se insiste.</summary>
     bool BatteryPromptShown { get; set; }
+
+    /// <summary>Versión de la política de privacidad aceptada (0 = nunca). Si sube, se vuelve a mostrar la bienvenida.</summary>
+    int ConsentVersion { get; set; }
 }
 
 /// <summary>Almacenamiento cifrado del refresh token (en MAUI: SecureStorage, respaldado por Android Keystore).</summary>

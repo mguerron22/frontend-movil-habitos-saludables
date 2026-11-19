@@ -9,6 +9,7 @@
 
     <!-- Pantallas de acceso: sin pestañas. Startup decide a cuál ir. -->
     <ShellContent Route="startup" ContentTemplate="{DataTemplate views:StartupPage}" />
+    <ShellContent Route="welcome" ContentTemplate="{DataTemplate views:WelcomePage}" />
     <ShellContent Route="login" ContentTemplate="{DataTemplate views:LoginPage}" />
     <ShellContent Route="unlock" ContentTemplate="{DataTemplate views:UnlockPage}" />
 

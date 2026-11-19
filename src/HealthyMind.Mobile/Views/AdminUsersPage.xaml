@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Administración de usuarios (RF01, solo Admin): buscar, suspender y reactivar. -->
+<!-- Administración de usuarios (RF01, solo Admin): buscar, suspender, reactivar y dar o quitar el rol Admin. -->
 <ContentPage
     x:Class="HealthyMind.Mobile.Views.AdminUsersPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -101,7 +101,18 @@
                                     <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource Peach}" Padding="8,2" IsVisible="{Binding IsAdmin}">
                                         <Label Text="Admin" FontSize="11" TextColor="{StaticResource Warning}" FontFamily="OpenSansSemibold" />
                                     </Border>
+                                    <Border Style="{StaticResource Chip}" BackgroundColor="{StaticResource InputBackground}" Padding="8,2"
+                                            IsVisible="{Binding IsPendingVerification}">
+                                        <Label Text="Correo sin confirmar" FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                                    </Border>
                                     <Label Text="Tú" Style="{StaticResource Caption}" FontSize="12" IsVisible="{Binding IsSelf}" />
+                                    <Label Text="{Binding RoleActionText}" Style="{StaticResource Link}" FontSize="13" IsVisible="{Binding CanToggle}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding ToggleRoleCommand, Source={RelativeSource AncestorType={x:Type vm:AdminUsersViewModel}}, x:DataType=vm:AdminUsersViewModel}"
+                                                CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
                                 </HorizontalStackLayout>
                                 <Label Grid.Row="1" Grid.Column="2" Text="{Binding ActionText}" Style="{StaticResource Link}" FontSize="14"
                                        HorizontalOptions="End" IsVisible="{Binding CanToggle}">

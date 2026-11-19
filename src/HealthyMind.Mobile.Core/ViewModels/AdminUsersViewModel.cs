@@ -8,7 +8,7 @@ using HealthyMind.Mobile.Core.Navigation;
 
 namespace HealthyMind.Mobile.Core.ViewModels;
 
-/// <summary>Administración de usuarios (RF01, rol Admin): buscar, suspender y reactivar cuentas.</summary>
+/// <summary>Administración de usuarios (RF01, rol Admin): buscar, suspender, reactivar y dar o quitar el rol Admin.</summary>
 public sealed partial class AdminUsersViewModel(
     AdminUsersApi adminApi,
     ISessionManager session,
@@ -85,6 +85,31 @@ public sealed partial class AdminUsersViewModel(
         }
     }
 
+    /// <summary>Dar o quitar el rol de administrador. El servidor cierra sus sesiones para aplicar el cambio.</summary>
+    [RelayCommand]
+    private async Task ToggleRoleAsync(AdminUserItem item)
+    {
+        var promote = !item.IsAdmin;
+        var confirmed = await dialogs.ConfirmAsync(
+            promote ? "Hacer administrador" : "Quitar administrador",
+            promote
+                ? $"{item.FullName} podrá ver el tablero, gestionar cuentas y dar este rol a otros. Deberá volver a iniciar sesión."
+                : $"{item.FullName} volverá a ser un usuario normal. Deberá volver a iniciar sesión.",
+            promote ? "Hacer admin" : "Quitar rol",
+            "Cancelar");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        UserProfile? updated = null;
+        var role = promote ? UserProfile.AdminRole : UserProfile.UserRole;
+        if (await RunAsync(async () => updated = await adminApi.ChangeRoleAsync(item.Id, role)) && updated is not null)
+        {
+            Users[Users.IndexOf(item)] = AdminUserItem.From(updated, session.CurrentUser?.Id);
+        }
+    }
+
     [RelayCommand]
     private Task GoBackAsync() => navigation.GoBackAsync();
 
@@ -127,10 +152,23 @@ public enum StatusFilter
     Suspended,
 }
 
-/// <param name="IsSelf">El administrador no puede suspenderse a sí mismo.</param>
-public sealed record AdminUserItem(Guid Id, string FullName, string Detail, string Initials, bool IsActive, bool IsAdmin, bool IsSelf)
+/// <param name="IsSelf">El administrador no puede suspenderse ni quitarse el rol a sí mismo.</param>
+/// <param name="EmailVerified">false: se registró pero no escribió el código del correo.</param>
+public sealed record AdminUserItem(
+    Guid Id,
+    string FullName,
+    string Detail,
+    string Initials,
+    bool IsActive,
+    bool IsAdmin,
+    bool IsSelf,
+    bool EmailVerified = true)
 {
     public bool CanToggle => !IsSelf;
+
+    public bool IsPendingVerification => !EmailVerified;
+
+    public string RoleActionText => IsAdmin ? "Quitar admin" : "Hacer admin";
 
     public string StatusText => IsActive ? "Activo" : "Suspendido";
 
@@ -143,5 +181,6 @@ public sealed record AdminUserItem(Guid Id, string FullName, string Detail, stri
         user.Initials,
         user.Status == UserStatuses.Active,
         user.IsAdmin,
-        user.Id == currentUserId);
+        user.Id == currentUserId,
+        user.EmailVerified);
 }

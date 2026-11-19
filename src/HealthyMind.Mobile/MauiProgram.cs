@@ -65,6 +65,7 @@ public static class MauiProgram
         services.AddSingleton<INavigationService, ShellNavigationService>();
         services.AddSingleton<IDialogService, ShellDialogService>();
         services.AddSingleton<IUiDispatcher, MauiUiDispatcher>();
+        services.AddSingleton<IExternalLinks, BrowserExternalLinks>();
         services.AddSingleton(Geolocation.Default);
         services.AddSingleton<ILocationProvider, MauiLocationProvider>();
 #if ANDROID
@@ -103,5 +104,9 @@ public static class MauiProgram
         services.AddTransient<ChangePasswordPage>();
         services.AddTransient<SessionsPage>();
         services.AddTransient<AdminUsersPage>();
+        services.AddTransient<AdminDashboardPage>();
+        services.AddTransient<VerifyEmailPage>();
+        services.AddTransient<ForgotPasswordPage>();
+        services.AddTransient<WelcomePage>();
     }
 }

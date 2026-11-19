@@ -17,6 +17,13 @@ public static class Routes
     public const string ChangePassword = "change-password";
     public const string Sessions = "sessions";
     public const string AdminUsers = "admin-users";
+    public const string AdminDashboard = "admin-dashboard";
+    public const string VerifyEmail = "verify-email";
+    public const string ForgotPassword = "forgot-password";
+    public const string Welcome = "welcome";
+
+    /// <summary>Parámetro con el correo al que llegó el código.</summary>
+    public const string EmailParameter = "email";
     public const string Insights = "insights";
 
     /// <summary>Parámetro con el id del hábito a editar.</summary>
@@ -32,6 +39,13 @@ internal sealed class ShellNavigationService : INavigationService
         GoAsync($"//{Routes.Login}", new Dictionary<string, object> { [Routes.NoticeParameter] = message ?? string.Empty });
 
     public Task GoToRegisterAsync() => GoAsync(Routes.Register);
+
+    public Task GoToVerifyEmailAsync(string email) =>
+        GoAsync(Routes.VerifyEmail, new Dictionary<string, object> { [Routes.EmailParameter] = email });
+
+    public Task GoToForgotPasswordAsync() => GoAsync(Routes.ForgotPassword);
+
+    public Task GoToWelcomeAsync() => GoAsync($"//{Routes.Welcome}");
 
     public Task GoToUnlockAsync() => GoAsync($"//{Routes.Unlock}");
 
@@ -56,12 +70,20 @@ internal sealed class ShellNavigationService : INavigationService
 
     public Task GoToAdminUsersAsync() => GoAsync(Routes.AdminUsers);
 
+    public Task GoToAdminDashboardAsync() => GoAsync(Routes.AdminDashboard);
+
     public Task GoBackAsync() => GoAsync("..");
 
     private static Task GoAsync(string route, IDictionary<string, object>? parameters = null) =>
         MainThread.InvokeOnMainThreadAsync(() => parameters is null
             ? Shell.Current.GoToAsync(route)
             : Shell.Current.GoToAsync(route, parameters));
+}
+
+internal sealed class BrowserExternalLinks : IExternalLinks
+{
+    public Task OpenAsync(Uri uri) =>
+        MainThread.InvokeOnMainThreadAsync(() => Browser.Default.OpenAsync(uri, BrowserLaunchMode.SystemPreferred));
 }
 
 internal sealed class MauiUiDispatcher : IUiDispatcher

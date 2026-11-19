@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Panel de administración (solo Admin): cifras de la plataforma y acceso a la gestión de usuarios. -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.AdminDashboardPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:AdminDashboardViewModel"
+    Shell.TabBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <DataTemplate x:Key="TileTemplate" x:DataType="vm:DashboardTile">
+            <Border Style="{StaticResource Card}" Padding="14" Margin="0,0,0,10" FlexLayout.Basis="48%">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="{Binding Title}" Style="{StaticResource Caption}" FontSize="12" />
+                    <Label Text="{Binding Value}" FontSize="26" FontFamily="OpenSansSemibold" TextColor="{StaticResource Primary}">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsSuccess}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource PrimaryLight}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsWarning}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource Warning}" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsDanger}" Value="True">
+                                <Setter Property="TextColor" Value="{StaticResource Danger}" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                    <Label Text="{Binding Caption}" Style="{StaticResource Caption}" FontSize="11" LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <RefreshView IsRefreshing="{Binding IsBusy}" Command="{Binding RefreshCommand}" RefreshColor="{StaticResource Primary}">
+        <ScrollView>
+            <VerticalStackLayout Padding="20,16,20,32" Spacing="14">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <ImageButton Source="ic_arrow_left.png" WidthRequest="44" HeightRequest="44" Padding="10" CornerRadius="22"
+                                 BackgroundColor="{StaticResource Surface}" Command="{Binding GoBackCommand}" SemanticProperties.Description="Volver" />
+                    <Label Grid.Column="1" Text="Panel de administración" Style="{StaticResource Title}" VerticalOptions="Center" />
+                </Grid>
+
+                <controls:OfflineBanner Margin="-20,0" />
+
+                <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
+                    <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
+                </Border>
+
+                <Label Text="Cuentas" Style="{StaticResource Subtitle}" />
+                <FlexLayout BindableLayout.ItemsSource="{Binding AccountTiles}" BindableLayout.ItemTemplate="{StaticResource TileTemplate}"
+                            Wrap="Wrap" JustifyContent="SpaceBetween">
+                </FlexLayout>
+
+                <Label Text="Uso" Style="{StaticResource Subtitle}" />
+                <FlexLayout BindableLayout.ItemsSource="{Binding UsageTiles}" BindableLayout.ItemTemplate="{StaticResource TileTemplate}"
+                            Wrap="Wrap" JustifyContent="SpaceBetween">
+                </FlexLayout>
+
+                <!-- Registros nuevos por día -->
+                <Border Style="{StaticResource Card}" Padding="16" IsVisible="{Binding HasData}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Cuentas nuevas (últimos 14 días)" FontFamily="OpenSansSemibold" />
+                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding SignUps}" Spacing="6" HeightRequest="118" HorizontalOptions="Center">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:DashboardBar">
+                                    <Grid RowDefinitions="Auto,*,Auto" WidthRequest="16" RowSpacing="2">
+                                        <Label Text="{Binding Count}" FontSize="9" HorizontalOptions="Center" TextColor="{StaticResource TextSecondary}" />
+                                        <BoxView Grid.Row="1" HeightRequest="{Binding Height}" VerticalOptions="End" CornerRadius="4"
+                                                 Color="{StaticResource Mint}" />
+                                        <Label Grid.Row="2" Text="{Binding Label}" FontSize="9" HorizontalOptions="Center" TextColor="{StaticResource TextMuted}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Acceso a la gestión -->
+                <Border Style="{StaticResource Card}" Padding="18,4">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14" Padding="0,12">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToUsersCommand}" />
+                        </Grid.GestureRecognizers>
+                        <Border WidthRequest="40" HeightRequest="40" StrokeShape="RoundRectangle 12" StrokeThickness="0" BackgroundColor="{StaticResource MintSoft}">
+                            <Image Source="ic_user_teal.png" WidthRequest="20" HeightRequest="20" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                            <Label Text="Usuarios y administradores" FontFamily="OpenSansSemibold" />
+                            <Label Text="Buscar, suspender, reactivar y dar o quitar el rol Admin" Style="{StaticResource Caption}" FontSize="12" />
+                        </VerticalStackLayout>
+                        <Image Grid.Column="2" Source="ic_chevron_right.png" WidthRequest="18" HeightRequest="18" />
+                    </Grid>
+                </Border>
+
+                <Label Style="{StaticResource Caption}" FontSize="12" HorizontalTextAlignment="Center"
+                       Text="Desliza hacia abajo para actualizar. Las cifras no incluyen datos personales." />
+            </VerticalStackLayout>
+        </ScrollView>
+    </RefreshView>
+</ContentPage>

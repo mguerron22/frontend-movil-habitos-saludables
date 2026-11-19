@@ -8,6 +8,14 @@ public interface INavigationService
 
     Task GoToRegisterAsync();
 
+    /// <summary>Pantalla para escribir el código que llegó al correo.</summary>
+    Task GoToVerifyEmailAsync(string email);
+
+    Task GoToForgotPasswordAsync();
+
+    /// <summary>Bienvenida y consentimiento de permisos (primer uso).</summary>
+    Task GoToWelcomeAsync();
+
     Task GoToUnlockAsync();
 
     /// <summary>Entra a la app (pestañas) y descarta el historial de login.</summary>
@@ -29,7 +37,16 @@ public interface INavigationService
     /// <summary>Administración de usuarios (solo Admin).</summary>
     Task GoToAdminUsersAsync();
 
+    /// <summary>Tablero con las cifras de la plataforma (solo Admin).</summary>
+    Task GoToAdminDashboardAsync();
+
     Task GoBackAsync();
+}
+
+/// <summary>Abre enlaces fuera de la app (navegador del sistema).</summary>
+public interface IExternalLinks
+{
+    Task OpenAsync(Uri uri);
 }
 
 /// <summary>Diálogos del sistema.</summary>

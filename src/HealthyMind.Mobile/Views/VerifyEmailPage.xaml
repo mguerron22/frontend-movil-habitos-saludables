@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Confirmar el correo con el código de 6 dígitos (después del registro o al entrar sin haberlo confirmado). -->
+<ContentPage
+    x:Class="HealthyMind.Mobile.Views.VerifyEmailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:HealthyMind.Mobile.Controls"
+    xmlns:vm="clr-namespace:HealthyMind.Mobile.Core.ViewModels;assembly=HealthyMind.Mobile.Core"
+    x:DataType="vm:VerifyEmailViewModel"
+    Background="{StaticResource PageGlow}"
+    Shell.TabBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,28,24,32" Spacing="18">
+            <controls:OfflineBanner Margin="-20,0" />
+
+            <Border HorizontalOptions="Center" WidthRequest="88" HeightRequest="88" StrokeThickness="0" StrokeShape="Ellipse"
+                    BackgroundColor="{StaticResource MintSoft}">
+                <Image Source="ic_mail.png" WidthRequest="40" HeightRequest="40" />
+            </Border>
+
+            <VerticalStackLayout Spacing="6">
+                <Label Text="Confirma tu correo" Style="{StaticResource Title}" HorizontalOptions="Center" />
+                <Label Style="{StaticResource Body}" HorizontalTextAlignment="Center">
+                    <Label.FormattedText>
+                        <FormattedString>
+                            <Span Text="Te enviamos un código de 6 dígitos a " />
+                            <Span Text="{Binding Email}" FontFamily="OpenSansSemibold" TextColor="{StaticResource PrimaryDark}" />
+                            <Span Text=". Vence en 15 minutos." />
+                        </FormattedString>
+                    </Label.FormattedText>
+                </Label>
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource Card}" Padding="20,22">
+                <VerticalStackLayout Spacing="14">
+                    <Border Style="{StaticResource InputShell}">
+                        <Entry AutomationId="VerifyCode" Placeholder="000000" Keyboard="Numeric" MaxLength="6"
+                               HorizontalTextAlignment="Center" FontSize="28" CharacterSpacing="10"
+                               ReturnType="Go" ReturnCommand="{Binding VerifyCommand}" Text="{Binding Code}" />
+                    </Border>
+
+                    <Border Style="{StaticResource SoftCard}" IsVisible="{Binding HasInfo}">
+                        <Label Text="{Binding Info}" TextColor="{StaticResource PrimaryDark}" FontSize="13" />
+                    </Border>
+
+                    <Border Style="{StaticResource ErrorBox}" IsVisible="{Binding HasError}">
+                        <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13" />
+                    </Border>
+
+                    <Grid>
+                        <Button Style="{StaticResource PrimaryButton}" Text="Confirmar y entrar" Command="{Binding VerifyCommand}" IsEnabled="{Binding IsNotBusy}" />
+                        <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource OnPrimary}"
+                                           WidthRequest="24" HeightRequest="24" HorizontalOptions="End" Margin="0,0,20,0" />
+                    </Grid>
+
+                    <Label Text="¿No llegó? Reenviar código" Style="{StaticResource Link}" FontSize="14" HorizontalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ResendCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource SoftCard}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Image Source="ic_shield.png" WidthRequest="22" HeightRequest="22" VerticalOptions="Start" />
+                    <Label Grid.Column="1" Style="{StaticResource Body}"
+                           Text="Así comprobamos que el correo es tuyo y podrás recuperar tu contraseña si la olvidas. Revisa también la carpeta de spam." />
+                </Grid>
+            </Border>
+
+            <Label Text="Volver al inicio de sesión" Style="{StaticResource Link}" FontSize="14" HorizontalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding GoToLoginCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

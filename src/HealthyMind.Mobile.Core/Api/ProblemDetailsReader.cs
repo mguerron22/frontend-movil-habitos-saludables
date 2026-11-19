@@ -37,7 +37,7 @@ internal static class ProblemDetailsReader
                 ? errors.Values.First()[0]
                 : detail ?? title ?? DefaultMessage(status);
 
-            return new ApiException(status, message, errors);
+            return new ApiException(status, message, errors, ReadString(root, "code"), ReadString(root, "email"));
         }
         catch (JsonException)
         {

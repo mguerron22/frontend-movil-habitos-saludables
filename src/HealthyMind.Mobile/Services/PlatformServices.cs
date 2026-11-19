@@ -168,6 +168,12 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
         set => preferences.Set("battery_prompt_shown", value);
     }
 
+    public int ConsentVersion
+    {
+        get => preferences.Get("consent_version", 0);
+        set => preferences.Set("consent_version", value);
+    }
+
     /// <summary>
     /// Release: el servidor de producción (HTTPS, detrás del IIS).
     /// Debug: el emulador de Android llega a la PC por 10.0.2.2; Windows, por localhost.

@@ -100,8 +100,8 @@
                             <Image Source="ic_server.png" WidthRequest="20" HeightRequest="20" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                            <Label Text="Administrar usuarios" FontFamily="OpenSansSemibold" />
-                            <Label Text="Buscar, suspender y reactivar cuentas" Style="{StaticResource Caption}" FontSize="12" />
+                            <Label Text="Panel de administración" FontFamily="OpenSansSemibold" />
+                            <Label Text="Tablero, usuarios y administradores" Style="{StaticResource Caption}" FontSize="12" />
                         </VerticalStackLayout>
                         <Image Grid.Column="2" Source="ic_chevron_right.png" WidthRequest="18" HeightRequest="18" />
                     </Grid>

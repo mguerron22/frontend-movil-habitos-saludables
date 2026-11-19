@@ -6,7 +6,7 @@ namespace HealthyMind.Mobile.Core.Tests;
 
 public sealed class ViewModelTests
 {
-    private static RegisterViewModel NewRegister() => new(null!, null!, null!);
+    private static RegisterViewModel NewRegister() => new(null!, null!);
 
     [Fact]
     public void Register_validation_matches_backend_rules()

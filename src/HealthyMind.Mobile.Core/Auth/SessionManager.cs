@@ -36,7 +36,11 @@ public interface ISessionManager : IAccessTokenSource
 
     Task LoginAsync(string usernameOrEmail, string password, CancellationToken cancellationToken = default);
 
-    Task RegisterAsync(NewAccount account, CancellationToken cancellationToken = default);
+    /// <summary>Crea la cuenta; el servidor manda un código al correo. Devuelve ese correo.</summary>
+    Task<string> RegisterAsync(NewAccount account, CancellationToken cancellationToken = default);
+
+    /// <summary>Confirma el correo con el código y abre la sesión.</summary>
+    Task VerifyEmailAsync(string email, string code, CancellationToken cancellationToken = default);
 
     /// <summary>Retoma la sesión guardada: es lo que se hace después de la huella.</summary>
     Task<ResumeOutcome> ResumeAsync(CancellationToken cancellationToken = default);
@@ -155,7 +159,7 @@ public sealed class SessionManager : ISessionManager, IDisposable
         settings.LastUsername = usernameOrEmail.Trim();
     }
 
-    public async Task RegisterAsync(NewAccount account, CancellationToken cancellationToken = default)
+    public async Task<string> RegisterAsync(NewAccount account, CancellationToken cancellationToken = default)
     {
         var response = await authApi.RegisterAsync(
             new RegisterRequest(
@@ -168,8 +172,17 @@ public sealed class SessionManager : ISessionManager, IDisposable
                 settings.DeviceName,
                 LocalTimeZone.IanaId()),
             cancellationToken);
-        await StartSessionAsync(response);
         settings.LastUsername = account.Username.Trim();
+        return response.Email;
+    }
+
+    public async Task VerifyEmailAsync(string email, string code, CancellationToken cancellationToken = default)
+    {
+        var response = await authApi.VerifyEmailAsync(
+            new VerifyEmailRequest(email.Trim(), code.Trim(), settings.DeviceId, settings.DeviceName),
+            cancellationToken);
+        await StartSessionAsync(response);
+        settings.LastUsername = response.User.Username;
     }
 
     public async Task<ResumeOutcome> ResumeAsync(CancellationToken cancellationToken = default)

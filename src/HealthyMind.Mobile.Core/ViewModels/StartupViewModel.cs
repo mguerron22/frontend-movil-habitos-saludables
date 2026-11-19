@@ -5,8 +5,8 @@ using HealthyMind.Mobile.Core.Settings;
 namespace HealthyMind.Mobile.Core.ViewModels;
 
 /// <summary>
-/// Decide la primera pantalla: login (sin sesión), huella (sesión guardada y huella activada)
-/// o directo a la app (sesión guardada sin huella).
+/// Decide la primera pantalla: bienvenida (sin consentimiento), login (sin sesión),
+/// huella (sesión guardada y huella activada) o directo a la app (sesión guardada sin huella).
 /// </summary>
 public sealed class StartupViewModel(
     ISessionManager session,
@@ -14,7 +14,11 @@ public sealed class StartupViewModel(
     IAppSettings settings,
     INavigationService navigation) : ViewModelBase
 {
-    public async Task StartAsync()
+    public Task StartAsync() =>
+        WelcomeViewModel.IsPending(settings) ? navigation.GoToWelcomeAsync() : ProceedAsync();
+
+    /// <summary>Lo que sigue una vez aceptada la política.</summary>
+    public async Task ProceedAsync()
     {
         if (!await session.HasStoredSessionAsync())
         {

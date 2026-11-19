@@ -45,4 +45,10 @@ public sealed class AdminUsersApi(AuthenticatedApiClient api)
 
     public Task<UserProfile> ReactivateAsync(Guid userId, CancellationToken cancellationToken = default) =>
         api.PatchAsync<UserProfile>($"api/admin/users/{userId}/reactivate", null, cancellationToken);
+
+    public Task<UserProfile> ChangeRoleAsync(Guid userId, string role, CancellationToken cancellationToken = default) =>
+        api.PatchAsync<UserProfile>($"api/admin/users/{userId}/role", new ChangeRoleRequest(role), cancellationToken);
+
+    public Task<AdminDashboard> GetDashboardAsync(CancellationToken cancellationToken = default) =>
+        api.GetAsync<AdminDashboard>("api/admin/dashboard", cancellationToken);
 }
