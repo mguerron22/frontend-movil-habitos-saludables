@@ -92,11 +92,18 @@ internal sealed class PreferencesAppSettings(IPreferences preferences) : IAppSet
     }
 
     /// <summary>
-    /// El emulador de Android llega a la PC por 10.0.2.2; Windows, por localhost.
-    /// En un celular físico se cambia desde el login (ícono de servidor).
+    /// Release: el servidor de producción (HTTPS, detrás del IIS).
+    /// Debug: el emulador de Android llega a la PC por 10.0.2.2; Windows, por localhost.
+    /// En cualquier caso se puede cambiar desde el login (ícono de servidor).
     /// </summary>
-    private static string DefaultApiBaseUrl() =>
-        DeviceInfo.Current.Platform == DevicePlatform.Android ? "http://10.0.2.2:5080" : "http://localhost:5080";
+    private static string DefaultApiBaseUrl()
+    {
+#if DEBUG
+        return DeviceInfo.Current.Platform == DevicePlatform.Android ? "http://10.0.2.2:5080" : "http://localhost:5080";
+#else
+        return "https://maui.appservices.com.ec";
+#endif
+    }
 }
 
 /// <summary>Refresh token cifrado con SecureStorage (Android Keystore / DPAPI en Windows).</summary>

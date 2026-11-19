@@ -31,6 +31,11 @@ public static class MauiProgram
         RemoveNativeEntryUnderline();
         AddPlatformServices(builder.Services);
         builder.Services.AddHealthyMindCore(Path.Combine(FileSystem.AppDataDirectory, "healthymind.db3"));
+#if ANDROID
+        // Android ≤ 13 no trae la raíz del certificado de producción (ver SectigoR46Trust).
+        builder.Services.ConfigureHttpClientDefaults(http =>
+            http.ConfigurePrimaryHttpMessageHandler(Platforms.Android.SectigoR46Trust.CreateHandler));
+#endif
         AddPages(builder.Services);
 
         return builder.Build();
